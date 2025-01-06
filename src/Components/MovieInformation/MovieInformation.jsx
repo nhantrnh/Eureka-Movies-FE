@@ -5,7 +5,7 @@ import { Movie as MovieIcon, Theaters, Language, PlusOne, Favorite, FavoriteBord
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Helmet } from "react-helmet";
-import axios from 'axios';
+import axios from '../../utils/axios';
 import { useGetListQuery, useGetMovieQuery, useGetRecommendationsQuery } from '../../services/TMDB.js';
 import { Loader, MovieList, NotFound } from './../index.js'
 import moviePoster from './../../assests/movie-poster.png'

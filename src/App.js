@@ -2,14 +2,12 @@
 import './App.css';
 import { CssBaseline } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
-import { Movies, MovieInformation, Actors, Profile, NavBar, NotFound } from './Components/index.js'
+import { Movies, MovieInformation, Actors, Profile, NavBar, NotFound, Login, Register, ResetPassword } from './Components/index.js'
 import useStyles from './App.styles.js'
 import useAlan from './Components/Alan.jsx';
 import { useRef } from 'react';
 import { Helmet } from 'react-helmet';
-
 function App() {
-
   const classes = useStyles();
   const alanBtnContainer = useRef();
   // useAlan();
@@ -29,6 +27,9 @@ function App() {
           <Route path='/actor/:id' element={<Actors />} />
           <Route path='/profile/:id' element={<Profile />} />
           <Route path='*' element={<NotFound />} />
+          <Route path="/login" element={<Login/>} />
+          <Route path="/signup" element={<Register/>} />
+          <Route path="/reset-password" element={<ResetPassword/>} />
         </Routes>
       </main>
       <div ref={alanBtnContainer} />

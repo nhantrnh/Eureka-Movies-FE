@@ -24,11 +24,13 @@ export default function Search() {
     return <>
         <div className={classes.searchContainer}>
             <TextField 
+
                 onKeyPress={handleKeyPress} 
                 value={query} 
                 onChange={(e)=> setQuery(e.target.value)} 
                 variant='standard' 
                 InputProps={{
+                    style: { maxWidth: '500px', },
                     className: classes.input,
                     startAdornment: (
                         <InputAdornment position='start' >

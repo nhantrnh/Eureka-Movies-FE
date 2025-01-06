@@ -7,8 +7,6 @@ import { Provider } from 'react-redux';
 import store from './app/store.js'
 import ToggleColorModeProvider from './utils/ToggoleColorMode.jsx'
 
-
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <Provider store={store}>

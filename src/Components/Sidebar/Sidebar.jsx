@@ -8,6 +8,7 @@ import { Footer, Loader } from './../index.js'
 import genreIcons from './../../assests/genres/index.js'
 import { useDispatch, useSelector } from 'react-redux';
 import { selectGenreOrCategory } from '../../features/currentGenreOrCategory.js';
+import logo from './../../assests/logo.png';
 
 const categories = [
     { label: 'Popular', value: 'popular' },
@@ -32,6 +33,12 @@ export default function Sidebar({ setMobileOpen }) {
 
 
     return <>
+            <Link to={`/`} className={classes.imageLink}>
+            <img
+                className={classes.image}
+                src={logo}
+                alt="Eureka Movies" />
+        </Link>
         <Divider />
         <List>
             <ListSubheader>
