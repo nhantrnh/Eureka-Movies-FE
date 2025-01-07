@@ -4,13 +4,10 @@ import { CssBaseline } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
 import { Movies, MovieInformation, Actors, Profile, NavBar, NotFound, Login, Register, ResetPassword } from './Components/index.js'
 import useStyles from './App.styles.js'
-import useAlan from './Components/Alan.jsx';
 import { useRef } from 'react';
 import { Helmet } from 'react-helmet';
 function App() {
   const classes = useStyles();
-  const alanBtnContainer = useRef();
-  // useAlan();
 
   return <>
     <Helmet>
@@ -32,7 +29,6 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword/>} />
         </Routes>
       </main>
-      <div ref={alanBtnContainer} />
     </div>
   </>;
 }
