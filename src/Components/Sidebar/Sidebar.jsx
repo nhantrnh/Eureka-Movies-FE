@@ -27,17 +27,18 @@ export default function Sidebar({ setMobileOpen }) {
     const dispatch = useDispatch();
 
 
-    useEffect(()=>{
+    useEffect(() => {
         setMobileOpen(false);
     }, [genreIdOrCategoryName]);
 
 
     return <>
-            <Link to={`/`} className={classes.imageLink}>
+        <Link to={`/`} className={classes.imageLink}>
             <img
                 className={classes.image}
                 src={logo}
-                alt="Eureka Movies" />
+                alt="Eureka Movies"
+               />
         </Link>
         <Divider />
         <List>
@@ -60,9 +61,9 @@ export default function Sidebar({ setMobileOpen }) {
             <ListSubheader>
                 Genres
             </ListSubheader>
-            {isFetching? <Loader /> : data?.genres?.map(({ name, id }) => (
+            {isFetching ? <Loader /> : data?.genres?.map(({ name, id }) => (
                 <Link key={id} className={classes.links} to={`/`} >
-                    <ListItem onClick={() => dispatch(selectGenreOrCategory(id)) } button>
+                    <ListItem onClick={() => dispatch(selectGenreOrCategory(id))} button>
                         <ListItemIcon>
                             <img src={genreIcons[name.toLowerCase()]} alt="icon" className={classes.genereImages} height={30} />
                         </ListItemIcon>

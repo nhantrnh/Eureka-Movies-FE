@@ -5,10 +5,9 @@ export default makeStyles((theme)=>({
     imageLink: {
         display: 'flex',
         justifyContent: 'center',
-        padding: '10% 0',
     },
     image: {
-        width: '60%',
+        width: '40%',
     },
     links: {
         color: theme.palette.text.primary,

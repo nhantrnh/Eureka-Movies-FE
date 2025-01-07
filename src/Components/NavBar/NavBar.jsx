@@ -11,7 +11,6 @@ import { setUser, userSelector } from '../../features/auth.js';
 import { ColorModeContext } from './../../utils/ToggoleColorMode';
 import avater from './../../assests/avatar-profile.jpg';
 import { useGetTrendingMoviesQuery } from '../../services/TMDB.js';  // Importing the query hook
-import { toast } from 'react-toastify';
 import UserServices from '../../services/user.s'; // Importing UserServices
 
 export default function NavBar() {
