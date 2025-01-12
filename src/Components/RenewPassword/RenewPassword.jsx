@@ -1,39 +1,36 @@
 import { Button, Form, Input, notification } from "antd";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 
-const Register = () => {
+const RenewPassword = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const register = async (values) => {
+
+  const handleRenewPassword = async (values) => {
     setLoading(true);
     try {
-      const result = await axios.post("http://localhost:5084/api/Authentication/Register", values);
-
+      await axios.post("http://localhost:5084/api/Authentication/RenewPassword", values);
       notification.success({
-        message: result?.data?.message,
-        description: "Redirecting to confirm email page after 2 seconds...",
+        message: "Password Updated",
+        description: "Your password has been successfully updated.",
       });
-      setTimeout(() => {
-        navigate("/confirm-email");
-      }, 2000);
+      navigate("/login");
     } catch (error) {
       notification.error({
         message: error?.response?.data?.message,
       });
-      setLoading(false);
     }
-    
+    setLoading(false);
   };
 
   return (
     <>
-      <h1>Register</h1>
+      <h1>Renew Password</h1>
       <Form
+        onFinish={handleRenewPassword}
         disabled={loading}
-        onFinish={register}
-        name="basic"
+        name="renew-password"
         labelCol={{
           span: 8,
         }}
@@ -54,40 +51,30 @@ const Register = () => {
         </Form.Item>
 
         <Form.Item
-          label="Name"
-          name="displayname"
-          rules={[{ required: true, message: "Name is required" }]}
+          label="Reset Code"
+          name="resetCode"
+          rules={[{ required: true, message: "Reset code is required" }]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          label="Avatar"
-          name="avatar"
-          rules={[{ required: true, message: "Hobby is required" }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Password"
-          name="password"
+          label="New Password"
+          name="newPassword"
           rules={[
-            { required: true, message: "Password is required" },
+            { required: true, message: "New password is required" },
             { min: 6, message: "Password must be at least 6 characters" },
           ]}
         >
           <Input.Password />
         </Form.Item>
+
         <Form.Item
           wrapperCol={{
             offset: 8,
             span: 16,
           }}
         >
-          <div style={{ marginBottom: 10 }}>
-            Got an account? <Link to={"/login"}>Login</Link>
-          </div>
-
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
@@ -96,4 +83,5 @@ const Register = () => {
     </>
   );
 };
-export default Register;
+
+export default RenewPassword;

@@ -22,9 +22,9 @@ export default function NavBar() {
     const colorMode = useContext(ColorModeContext);
     const dispatch = useDispatch();
     const { isAuthenticated, user } = useSelector(userSelector);
-    const token = localStorage.getItem('request_token');
     const sessionIdFromLocalStorage = localStorage.getItem('session_id');
     const navigate = useNavigate();
+    const token = UserServices.getUserToken();
 
     useEffect(() => {
         const logInUser = async () => {
@@ -129,7 +129,7 @@ export default function NavBar() {
                         </ToggleButtonGroup>
                     </div>
                     <div>
-                        {!isAuthenticated ? (
+                        {!token ? (
                             <>
                                 <Button color='inherit' onClick={handleGoToAdminPage}>
                                     Login &nbsp; <AccountCircle />
@@ -137,6 +137,7 @@ export default function NavBar() {
                                 <Button color='inherit' onClick={handleRegister}>
                                     Sign Up &nbsp; <AccountCircleOutlined />
                                 </Button>
+                                
                             </>
                         ) : (
                             <Button

@@ -18,5 +18,7 @@ export { default as FeaturedMovie } from './FeaturedMovie/FeaturedMovie.jsx';
 export { default as Login } from './Login/Login.jsx';
 export { default as Register } from './Register/Register.jsx';
 export { default as ResetPassword } from './ResetPassword/ResetPassword.jsx';
-
+export { default as ConfirmEmail } from './ConfirmEmail/ConfirmEmail.jsx';
+export { default as RenewPassword } from './RenewPassword/RenewPassword.jsx';
+export { default as ForgotPassword } from './ForgotPassword/ForgotPassword.jsx';
 
