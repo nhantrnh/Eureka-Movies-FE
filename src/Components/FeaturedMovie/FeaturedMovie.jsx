@@ -10,12 +10,12 @@ export default function FeaturedMovie({ movie }) {
     if (!movie) return null;
 
     return <>
-        <Box component={Link} to={`/movie/${movie?.id}`} className={classes.featuredCardContainer} >
+        <Box component={Link} to={`/Movie/Detail/${movie?.tmdbId}`} className={classes.featuredCardContainer} >
             <Card className={classes.card} classes={{ root: classes.cardRoot }} >
                 <CardMedia
                     media='picture'
                     alt={movie?.title}
-                    image={`https://image.tmdb.org/t/p/original/${movie?.backdrop_path}`}
+                    image={`https://image.tmdb.org/t/p/original/${movie?.posterPath}`}
                     title={movie?.title}
                     className={classes.cardMedia}
                 />

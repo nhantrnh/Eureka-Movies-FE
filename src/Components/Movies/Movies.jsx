@@ -9,16 +9,21 @@ import { FeaturedMovie, Loader, MovieList, Pagination } from './../index.js'
 export default function Movies() {
     const classes = useStyles();
     const [page, setPage] = useState(1);
+    let maxPerPage = 20;
     const { genreIdOrCategoryName, searchQuery } = useSelector((state) => state.curruntGenreOrCategory);
-    const { data, error, isLoading, isFetching } = useGetMoviesQuery({ genreIdOrCategoryName, page, searchQuery });
+    if (genreIdOrCategoryName === 'TrendingDay') {
+        maxPerPage = 10;
+    }
+    const { generalId } = useSelector((state) => state.curruntGenreOrCategory);
+
+    const { data, error, isLoading, isFetching } = useGetMoviesQuery({ genreIdOrCategoryName, page, searchQuery, maxPerPage, generalId });
 
     const lg = useMediaQuery((theme) => theme.breakpoints.only('lg'));
     const numberOfMovies = lg ? 17 : 19;
 
-
     if (isFetching) return <Loader size={'4rem'} />
 
-    if (!data?.results?.length) {
+    if (!data?.data.length) {
         return <>
             <Box display='flex' alignItems='center' mt='20px'>
                 <Typography variant='h4'>
@@ -34,9 +39,19 @@ export default function Movies() {
 
     return <>
         <div>
-            <FeaturedMovie movie={data?.results[0]} />
-            <MovieList movies={data} numberOfMovies={numberOfMovies} excludeFirst />
-            <Pagination curruntPage={page} setPage={setPage} totalPages={data?.total_pages} />
+            <FeaturedMovie
+                movie={genreIdOrCategoryName === 'LatestTrailers' && data?.data?.length > 0
+                    ? {
+                        ...data.data[0].movie,
+                        trailer: data.data[0].trailer
+                    }
+                    : data?.data[0]}
+            />
+            <MovieList movies={genreIdOrCategoryName === 'LatestTrailers' ? data.data.map(item => ({
+                ...item.movie,
+                trailer: item.trailer
+            })) : data.data} numberOfMovies={numberOfMovies} excludeFirst />
+            <Pagination curruntPage={page} setPage={setPage} totalPages={data.paging.totalPage} />
         </div>
     </>
 }

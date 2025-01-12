@@ -11,9 +11,11 @@ import { selectGenreOrCategory } from '../../features/currentGenreOrCategory.js'
 import logo from './../../assests/logo.png';
 
 const categories = [
-    { label: 'Popular', value: 'popular' },
-    { label: 'Top Rated', value: 'top_rated' },
-    { label: 'Upcoming', value: 'upcoming' },
+    { label: 'Home', value: 'Home'},
+    { label: 'Popular', value: 'Popular' },
+    { label: 'Trending Day', value: 'TrendingDay' },
+    { label: 'Trending Week', value: 'TrendingWeek' },
+    { label: 'Lasted Trailers', value: 'LatestTrailers' },
 ];
 
 
@@ -23,7 +25,6 @@ export default function Sidebar({ setMobileOpen }) {
     const theme = useTheme();
 
     const { genreIdOrCategoryName } = useSelector((state) => state.curruntGenreOrCategory);
-    const { data, isFetching } = useGetGenresQuery();
     const dispatch = useDispatch();
 
 
@@ -49,7 +50,7 @@ export default function Sidebar({ setMobileOpen }) {
                 <Link key={value} className={classes.links} to={`/`} >
                     <ListItem onClick={() => dispatch(selectGenreOrCategory(value))} button>
                         <ListItemIcon>
-                            <img src={genreIcons[label.toLowerCase()]} alt="icon" className={classes.genereImages} height={30} />
+                            <img src={genreIcons[value.toLowerCase()]} alt="icon" className={classes.genereImages} height={30} />
                         </ListItemIcon>
                         <ListItemText primary={label} />
                     </ListItem>
@@ -57,21 +58,6 @@ export default function Sidebar({ setMobileOpen }) {
             ))}
         </List>
         <Divider />
-        <List>
-            <ListSubheader>
-                Genres
-            </ListSubheader>
-            {isFetching ? <Loader /> : data?.genres?.map(({ name, id }) => (
-                <Link key={id} className={classes.links} to={`/`} >
-                    <ListItem onClick={() => dispatch(selectGenreOrCategory(id))} button>
-                        <ListItemIcon>
-                            <img src={genreIcons[name.toLowerCase()]} alt="icon" className={classes.genereImages} height={30} />
-                        </ListItemIcon>
-                        <ListItemText primary={name} />
-                    </ListItem>
-                </Link>
-            ))}
-        </List>
         <Divider />
         <Footer />
 

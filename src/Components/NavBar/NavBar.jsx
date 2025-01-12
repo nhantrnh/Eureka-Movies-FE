@@ -1,81 +1,48 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import useStyles from './NavBar.style.js';
-import { AppBar, IconButton, Toolbar, useMediaQuery, Drawer, Button, Avatar, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { AppBar, IconButton, Toolbar, useMediaQuery, Drawer, Button, Avatar, Select, MenuItem } from '@mui/material';
 import { Brightness7, Brightness4, AccountCircle, Menu, AccountCircleOutlined } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Sidebar } from './../index.js';
-import { createSessionId, fetchToken, moviesApi } from '../../utils/index.js';
-import { useDispatch, useSelector } from 'react-redux';
-import { setUser, userSelector } from '../../features/auth.js';
+import { useDispatch } from 'react-redux';
+import { selectGenre } from '../../features/currentGenreOrCategory.js';
 import { ColorModeContext } from './../../utils/ToggoleColorMode';
 import avater from './../../assests/avatar-profile.jpg';
-import { useGetTrendingMoviesQuery } from '../../services/TMDB.js';  // Importing the query hook
-import UserServices from '../../services/user.s'; // Importing UserServices
 
 export default function NavBar() {
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [timeRange, setTimeRange] = useState('day'); // default to "Today"
+    const [category, setCategory] = useState('animation'); // Add category state
     const classes = useStyles();
     const isMobile = useMediaQuery('(max-width: 600px)');
     const theme = useTheme();
     const colorMode = useContext(ColorModeContext);
     const dispatch = useDispatch();
-    const { isAuthenticated, user } = useSelector(userSelector);
-    const sessionIdFromLocalStorage = localStorage.getItem('session_id');
+
     const navigate = useNavigate();
-    const token = UserServices.getUserToken();
+    const token = "";
 
-    useEffect(() => {
-        const logInUser = async () => {
-            if (token) {
-                if (sessionIdFromLocalStorage) {
-                    const { data: userData } = await moviesApi.get(`/account?session_id=${sessionIdFromLocalStorage}`)
-                    dispatch(setUser(userData));
-                } else {
-                    const sessionId = await createSessionId();
-                    const { data: userData } = await moviesApi.get(`/account?session_id=${sessionId}`)
-                    dispatch(setUser(userData));
-                }
-            }
-        };
-        logInUser();
-    }, [token]);
-
-    const handleTimeRangeChange = (event, newTimeRange) => {
-        if (newTimeRange !== null) {
-            setTimeRange(newTimeRange);
+    const handleCategoryChange = (event) => {
+        const selectedCategory = event.target.value;
+        setCategory(selectedCategory);
+        let generalId = " ";
+        if (selectedCategory === 'animation') {
+            generalId = 16;
+        } else if (selectedCategory === 'comedy') {
+            generalId = 35;
+        } else if (selectedCategory === 'science_fiction') {
+            generalId = 878;
         }
+        dispatch(selectGenre(generalId));
     };
+
     const handleGoToAdminPage = async () => {
-        /*try {
-        const response = await UserServices.fetchListUsers();
-        if (response.statusCode === 200) {
-        console.log('List users:', response.data);
-        navigate(`/profile/${user.id}`);
-        }
-        else if (response.statusCode === 401) {
-        toast.error(response.message);
-        navigate('/login');
-        }
-        else {
-        toast.error(response.message);
-        }
-        }
-        catch (error) {
-        console.log('Error:', error);
-        toast.error(error);
-        navigate('/login');
-        }*/
         navigate('/login');
     }
 
     const handleRegister = async () => {
         navigate('/signup');
     }
-
-    // Use the hook to get trending movies based on the selected time range
-    const { data: trendingMovies, isLoading, error } = useGetTrendingMoviesQuery({ timeFilter: timeRange, page: 1 });
 
     return (
         <>
@@ -95,41 +62,22 @@ export default function NavBar() {
                     <IconButton color='inherit' sx={{ ml: 1 }} onClick={colorMode.toggoleColorMode}>
                         {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
                     </IconButton>
-                    
+
                     {!isMobile && <Search />}
-                                        {/* Toggle between Today and This Week */}
-                    <div style={{textAlign: 'center', alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
-                        <ToggleButtonGroup
-                            value={timeRange}
-                            exclusive
-                            onChange={handleTimeRangeChange}
-                            aria-label="Trending movies time range"
-                            color="primary" // Set primary color
-                        >
-                            <ToggleButton
-                                value="day"
-                                aria-label="Trending Today"
-                                style={{
-                                    color: timeRange === 'day' ? '#ffffff' : '#000000', // Text color
-                                    backgroundColor: timeRange === 'day' ? '#3f51b5' : '#f0f0f0', // Background color
-                                }}
-                            >
-                                Today
-                            </ToggleButton>
-                            <ToggleButton
-                                value="week"
-                                aria-label="Trending This Week"
-                                style={{
-                                    color: timeRange === 'week' ? '#ffffff' : '#000000', // Text color
-                                    backgroundColor: timeRange === 'week' ? '#3f51b5' : '#f0f0f0', // Background color
-                                }}
-                            >
-                                This Week
-                            </ToggleButton>
-                        </ToggleButtonGroup>
-                    </div>
+                   
+                    <Select
+                        value={category}
+                        onChange={handleCategoryChange}
+                        displayEmpty
+                        sx={{ color: 'white', ml: 2 }}
+                    >
+                        <MenuItem value="animation">Animation</MenuItem>
+                        <MenuItem value="comedy">Comedy</MenuItem>
+                        <MenuItem value="science_fiction">Science Fiction</MenuItem>
+                    </Select>
+
                     <div>
-                        {!token ? (
+                       (
                             <>
                                 <Button color='inherit' onClick={handleGoToAdminPage}>
                                     Login &nbsp; <AccountCircle />
@@ -137,29 +85,11 @@ export default function NavBar() {
                                 <Button color='inherit' onClick={handleRegister}>
                                     Sign Up &nbsp; <AccountCircleOutlined />
                                 </Button>
-                                
                             </>
-                        ) : (
-                            <Button
-                                color='inherit'
-                                component={Link}
-                                to={`/profile/${user.id}`}
-                                className={classes.linkButtom}
-                                onClick={() => { }}
-                            >
-                                {!isMobile && <>My Movies &nbsp;</>}
-                                <Avatar
-                                    style={{ width: 30, height: 30 }}
-                                    alt='Profile'
-                                    src={user?.avater?.tmdb?.avatar_path ?
-                                        `https://www.themoviedb.org/t/p/w64_and_h64_face/${user?.avater?.tmdb?.avatar_path}` : avater}
-                                />
-                            </Button>
-                        )}
+                        ) 
                     </div>
                     {isMobile && <Search />}
                 </Toolbar>
-
             </AppBar>
 
             <div>
@@ -182,8 +112,6 @@ export default function NavBar() {
                     )}
                 </nav>
             </div>
-
-
         </>
     );
 }

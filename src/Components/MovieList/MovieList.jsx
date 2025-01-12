@@ -10,7 +10,7 @@ export default function MovieList({ movies, numberOfMovies, excludeFirst }) {
 
     return <>
         <Grid container className={classes.moviesContainer}>
-            { movies?.results?.slice(startFrom, numberOfMovies)?.map((movie, index)=>(
+            { movies?.slice(startFrom, numberOfMovies)?.map((movie, index)=>(
                 <Movie key={index} movie={movie} index={index} />
             )) }
         </Grid>

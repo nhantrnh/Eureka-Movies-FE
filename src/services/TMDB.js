@@ -15,32 +15,38 @@ export const tmdbApi = createApi({
 
         //* Get Movies by [Type]
         getMovies: builder.query({
-            query: ({ genreIdOrCategoryName, page, searchQuery })=> {
+            query: ({ genreIdOrCategoryName, page, maxPerPage, searchQuery, generalId })=> {
+
+                // Get all movies
+                if(genreIdOrCategoryName === 'Home' && !searchQuery && !generalId){
+                    return `/Movie/Movies?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                }
 
                 //* Get Movies by Search
                 if(searchQuery){
-                    return `/search/movie?query=${searchQuery}&page=${page}&api_key=${tmdbApiKey}`;
+                    return `/Movie/Movies?Keyword=${searchQuery}&GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
                 }
                 
                 //* Get Movies by Category
                 if(genreIdOrCategoryName && typeof genreIdOrCategoryName === 'string') {
-                    return  `/movie/${genreIdOrCategoryName}?page=${page}&api_key=${tmdbApiKey}`;
+                    return  `/Movie/${genreIdOrCategoryName}?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
                 }
-                
+
                 //* Get Movies by Genre
-                if (genreIdOrCategoryName && typeof genreIdOrCategoryName === 'number'){
-                    return `discover/movie?with_genres=${genreIdOrCategoryName}&page=${page}&api_key=${tmdbApiKey}`;
+                if(!searchQuery && generalId) {
+                    return `/Movie/Movies?GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
                 }
-                
+
                 //* Get Popular Movies
-                return `/movie/popular?page=${page}&api_key=${tmdbApiKey}`;
+                return `/Movie/Popular?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+
             }
         }),
 
         getTrendingMovies: builder.query({
-            query: ({ timeFilter, page }) => {
+            query: ({ timeFilter, page, maxPerPage }) => {
                 // timeFilter can either be 'day' or 'week'
-                return `/trending/movie/${timeFilter}?page=${page}&api_key=${tmdbApiKey}`;
+                return `/Movie/Trending${timeFilter}?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
             },
         }),
 
@@ -81,3 +87,62 @@ export const {
     useGetMoviesByActorIdQuery, 
     useGetTrendingMoviesQuery
 } = tmdbApi;
+
+
+// import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+
+// const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
+// export const eurekaApi = createApi({
+//     reducerPath: 'eurekaApi',
+//     baseQuery: fetchBaseQuery({ baseUrl}),
+//     endpoints: (builder)=>({
+
+
+//         getMoviesTrendingDay: builder.query({
+//             query: ({pageNumber, maxPerPage})=> `/Movie/TrendingDay/TrendingDay?PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`
+//         }),
+
+//         getMoviesTrendingWeek: builder.query({
+//             query: ({pageNumber, maxPerPage})=> `/Movie/TrendingWeek/TrendingWeek?PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`
+//         }),
+
+//         getMoviesPopular: builder.query({
+//             query: ({pageNumber, maxPerPage})=> `/Movie/Popular?PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`
+//         }),
+
+//         getMovieDetail: builder.query({
+//             query: (tmdbId)=> `/Movie/Detail/${tmdbId}`
+//         }),
+
+//         getMoviesLastedTrailers: builder.query({
+//             query: ({pageNumber, maxPerPage})=> `/Movie/LastedTrailers?PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`   
+//         }),
+
+//         getMovies: builder.query({
+//             query: ({ keyword, generalId, pageNumber, maxPerPage }) => {
+//                 if (keyword === null && generalId === null) {
+//                     return `/Movie/Movies?PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`;
+//                 } else if (keyword !== null && generalId === null) {
+//                     return `/Movie/Movies?Keyword=${keyword}&PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`;
+//                 } else if (keyword === null && generalId !== null) {
+//                     return `/Movie/Movies?GeneralId=${generalId}&PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`;
+//                 } else {
+//                     return `/Movie/Movies?Keyword=${keyword}&GeneralId=${generalId}&PageNumber=${pageNumber}&MaxPerPage=${maxPerPage}`;
+//                 }
+//             }
+//         }),
+        
+        
+
+//     }),
+// });
+
+// export const { 
+//     useGetMoviesTrendingDayQuery,
+//     useGetMoviesTrendingWeekQuery,
+//     useGetMoviesPopularQuery,
+//     useGetMovieDetailQuery,
+//     useGetMoviesLastedTrailersQuery, 
+//     useGetMoviesQuery, 
+// } = eurekaApi;
