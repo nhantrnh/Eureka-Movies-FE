@@ -18,7 +18,7 @@ export default function MovieInformation() {
     const [isIframeLoading, setIsIframeLoading] = useState(false);
     const [playMovie, setPlayMovie] = useState(false);
     const [movieServer, setMovieServer] = useState(1);
-    const [isMovieFavorited, setIsMovieFavorited] = useState(true);
+    const [isMovieFavorited, setIsMovieFavorited] = useState(false);
     const [isMovieWatchlisted, setIsMovieWatchlisted] = useState(false);
     const { tmdbId } = useParams();
 
@@ -31,7 +31,8 @@ export default function MovieInformation() {
     const [rating, setRating] = useState(0);
     let favoriteId = "";
     let watchListId = "";
-    const handleRatingSubmit = async () => {
+    
+    const handleRatingSubmit = async (tmdbId) => {
         try {
             await axiosInstance.post('/Rating/Add', {
                 stars: rating,
@@ -94,15 +95,18 @@ export default function MovieInformation() {
     useEffect(() => {
         setIsMovieWatchlisted(!!watchList?.find(item => item.tmdbId === data?.tmdbId));
     }, [watchList, data]);
-
+   // console.log(isMovieFavorited)
+   // console.log(isMovieWatchlisted)
     const handleAddToFavorites = async (movie) => {
         try {
             await axiosInstance.post('/Favorite/Add', { tmdbId: movie.tmdbId });
         } catch (error) {
             console.error('Error adding to favorites:', error);
         }
-        setIsMovieFavorited((prev) => !prev);
+        //console.log( movie.tmdbId );
         addToFavorites();
+        setIsMovieFavorited((prev) => !prev);
+       // console.log(isMovieFavorited)
     };
 
 
@@ -114,6 +118,8 @@ export default function MovieInformation() {
         }
         setIsMovieWatchlisted((prev) => !prev);
         addToWatches();
+        // console.log(isMovieWatchlisted)
+
     };
 
 
@@ -212,7 +218,7 @@ export default function MovieInformation() {
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    onClick={handleRatingSubmit}
+                                    onClick={() =>handleRatingSubmit(data?.tmdbId)}
                                     className={classes.submitButton}
                                     disabled={rating === 0 ? true : false}
                                 >
@@ -266,10 +272,14 @@ export default function MovieInformation() {
                     )}
                 </Grid>
                 {data?.credits?.cast?.length > 6 && (
-                    <Button onClick={handleShowMore} variant="contained" color="primary" style={{ marginTop: '10px' }}>
-                        {showAll ? 'Show Less' : 'Show More'}
-                    </Button>
-                )}
+                        <Button  component={Link}
+                        to={`/movie/${tmdbId}/casts`}
+                        variant="contained"
+                        color="primary"
+                        style={{ marginTop: '10px' }}>
+                            See All Casts
+                        </Button>
+                    )}
                 <Grid item container style={{ marginTop: '2rem' }}> {/* Buttons Grid */}
                     <div className={classes.buttonsContainer}>
                         <Grid item className={classes.buttonsContainer} style={{ marginBottom: '20px', marginLeft: 'auto', marginRight: 'auto' }}>
@@ -303,7 +313,7 @@ export default function MovieInformation() {
                                         setIsIframeLoading(true);
                                     }}
                                     endIcon={<MovieIcon />}
-                                > Watch Now
+                                > Watch
                                 </Button>
                             </ButtonGroup>
                         </Grid>

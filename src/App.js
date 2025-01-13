@@ -1,7 +1,7 @@
 import './App.css';
 import { CssBaseline } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
-import { Movies, MovieInformation, Actors, Profile, NavBar, NotFound, Login, Register, ResetPassword, ActorsList, ConfirmEmail, ForgotPassword, RenewPassword, PublicRoute, PrivateRoute } from './Components/index.js';
+import { Movies, MovieInformation, Actors, Profile, NavBar, NotFound, Login, ActorsMovieList, WatchingList, FavoriteList ,Register, ResetPassword, ActorsList, ConfirmEmail, ForgotPassword, RenewPassword, PublicRoute, PrivateRoute } from './Components/index.js';
 import useStyles from './App.styles.js';
 import { Helmet } from 'react-helmet';
 
@@ -32,6 +32,9 @@ function App() {
             <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
             <Route path="/renew-password" element={<PublicRoute><RenewPassword /></PublicRoute>} />
             <Route path='/actors' element={<PrivateRoute><ActorsList /></PrivateRoute>} />
+            <Route path='/profile/watchlist' element={<PrivateRoute><WatchingList /></PrivateRoute>} />
+            <Route path='/profile/favorite' element={<PrivateRoute><FavoriteList /></PrivateRoute>} />
+            <Route path="/movie/:tmdbId/casts" element={<PrivateRoute><ActorsMovieList /></PrivateRoute>} />
           </Routes>
         </main>
       </div>

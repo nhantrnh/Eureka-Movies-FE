@@ -55,7 +55,7 @@ const ActorsList = () => {
                                     className={classes.viewButton}
                                     variant="contained" 
                                     component={Link} 
-                                    to={`/actor/${actor.movieCredits.idNumber}`}
+                                    to={`/actor/${actor.tmdbId}`}
                                 >
                                     View Details
                                 </Button>
