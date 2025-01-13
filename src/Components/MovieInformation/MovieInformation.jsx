@@ -10,6 +10,7 @@ import moviePoster from './../../assests/movie-poster.png'
 import genreIcons from './../../assests/genres/index.js'
 import { selectGenreOrCategory } from '../../features/currentGenreOrCategory.js';
 import { useFetchFavoriteList, useFetchWatchList } from '../../api/userAPI.js';
+import { isRejected } from '@reduxjs/toolkit';
 
 export default function MovieInformation() {
     const classes = useStyles();
@@ -29,9 +30,9 @@ export default function MovieInformation() {
     const [error, setError] = useState(null);
     const [ratingModalOpen, setRatingModalOpen] = useState(false);
     const [rating, setRating] = useState(0);
+    const [isRated, setIsRated] = useState(false);
     let favoriteId = "";
     let watchListId = "";
-    
     const handleRatingSubmit = async (tmdbId) => {
         try {
             await axiosInstance.post('/Rating/Add', {
@@ -52,6 +53,10 @@ export default function MovieInformation() {
             console.log('Response Data:', response.data.data);
             if (response.data) {
                 setData(response.data.data.movie);
+                setRating(response.data.data?.rating);
+                if (response.data.data?.rating > 0) {
+                    setIsRated(true);
+                }
             } else {
                 console.error('No data returned from API.');
             }
@@ -220,7 +225,7 @@ export default function MovieInformation() {
                                     color="primary"
                                     onClick={() =>handleRatingSubmit(data?.tmdbId)}
                                     className={classes.submitButton}
-                                    disabled={rating === 0 ? true : false}
+                                    disabled={rating === 0 || isRated}
                                 >
                                     Rate
                                 </Button>

@@ -10,8 +10,10 @@ export default function Movie({ movie, index }) {
     const posterPath = movie?.posterPath || movie?.poster_path;
     const releaseDate = movie?.releaseDate || movie?.release_date;
     let id = movie?.tmdbId;
+    let voteAverage = movie?.voteAverage;
     if (!movie?.tmdbId) {
         id = movie?.id;
+        voteAverage = movie?.vote_average;
     }
     return (
         <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.movie} >
@@ -26,9 +28,9 @@ export default function Movie({ movie, index }) {
                     <Typography className={classes.date} variant='h10'>
                         {releaseDate ? new Date(releaseDate).getFullYear() : 'N/A'}
                     </Typography>
-                    <Tooltip disableTouchListener title={`${movie?.voteAverage} / 10`}>
+                    <Tooltip disableTouchListener title={`${voteAverage} / 10`}>
                         <div>
-                            <Rating readOnly value={movie?.voteAverage / 2} precision={0.1} />
+                            <Rating readOnly value={voteAverage / 2} precision={0.1} />
                         </div>
                     </Tooltip>
                 </Link>
