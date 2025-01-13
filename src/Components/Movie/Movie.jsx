@@ -1,6 +1,6 @@
 import React from 'react'
 import useStyles from './Movie.style.js'
-import { Typography, Grid, Grow } from '@mui/material'
+import { Typography, Grid, Grow, Tooltip, Rating } from '@mui/material'
 import { Link } from 'react-router-dom';
 import moviePoster from '../../assests/movie-poster.png'
 
@@ -26,6 +26,11 @@ export default function Movie({ movie, index }) {
                     <Typography className={classes.date} variant='h10'>
                         {releaseDate ? new Date(releaseDate).getFullYear() : 'N/A'}
                     </Typography>
+                    <Tooltip disableTouchListener title={`${movie?.voteAverage} / 10`}>
+                        <div>
+                            <Rating readOnly value={movie?.voteAverage / 2} precision={0.1} />
+                        </div>
+                    </Tooltip>
                 </Link>
             </Grow>
         </Grid>

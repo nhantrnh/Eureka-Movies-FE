@@ -149,7 +149,7 @@ export default function Profile() {
                                         </Box>
                                     ))}
                                 </Box>
-                                <Button onClick={() => handleViewAll('ratings')} color="primary">
+                                <Button onClick={() => handleViewAll('ratings')} color="primary" style={{ marginLeft: '1rem' }}>
                                     See More
                                 </Button>
                             </Box>
