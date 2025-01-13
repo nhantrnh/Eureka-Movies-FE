@@ -49,7 +49,12 @@ export const tmdbApi = createApi({
         }),
 
         getFavoriteMovies: builder.query({
-            query: ({page, maxPerPage}) => `/Movie/Favorite?PageNumber=${page}&MaxPerPage=${maxPerPage}`
+            query: ({page, maxPerPage}) => {
+                if (page == 0 && maxPerPage == 0) {
+                    return `/Movie/Favorite`;
+                }
+                return `/Movie/Favorite?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+            }
         }),
 
         getActingList: builder.query({
@@ -89,7 +94,12 @@ export const tmdbApi = createApi({
         }),
 
         getWatchList: builder.query({
-            query: ({page, maxPerPage}) => `/WatchList/GetWatchList?PageNumber=${page}&MaxPerPage=${maxPerPage}`
+            query: ({page, maxPerPage}) => {
+                if (page == 0 && maxPerPage=== 0) {
+                    return `/WatchList/GetWatchList`;
+                }
+                return `/WatchList/GetWatchList?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+            }
         }),
 
         //* Get User Specific Lists

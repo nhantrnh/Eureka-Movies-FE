@@ -28,7 +28,8 @@ const ActorsList = () => {
     }
 
     if (error) return <div>An error has occurred.</div>;
-
+    data.data.map((actor) => {                                console.log(actor.id);
+    });
     return (
         <div className={classes.root}>
             <Typography className={classes.title} variant="h4">
@@ -54,7 +55,7 @@ const ActorsList = () => {
                                     className={classes.viewButton}
                                     variant="contained" 
                                     component={Link} 
-                                    to={`/actor/${actor.id}`}
+                                    to={`/actor/${actor.movieCredits.idNumber}`}
                                 >
                                     View Details
                                 </Button>

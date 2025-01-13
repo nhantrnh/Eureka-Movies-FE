@@ -1,4 +1,3 @@
-
 import { makeStyles } from "@mui/styles";
 
 export default makeStyles((theme) => ({
@@ -9,6 +8,7 @@ export default makeStyles((theme) => ({
         [theme.breakpoints.down('sm')]: {
             flexDirection: 'column',
             flexWrap: 'wrap',
+            alignItems: 'center', // Ensures content is centered on smaller screens
         },
     },
     posterContainer: {
@@ -20,7 +20,7 @@ export default makeStyles((theme) => ({
     },
     poster: {
         borderRadius: '20px',
-        boxShadow: '0.5em 1em 1em #404046bf', // rgp(64, 64, 70)
+        boxShadow: '0.5em 1em 1em #404046bf', // rgb(64, 64, 70)
         width: '80%',
         [theme.breakpoints.down('lg')]: {
             margin: '0 auto',
@@ -49,7 +49,7 @@ export default makeStyles((theme) => ({
         },
     },
     genereImage: {
-        filter: theme.palette.mode === 'dark' && 'invert(1)',
+        filter: theme.palette.mode === 'dark' ? 'invert(1)' : 'none',
         marginRight: '10px',
     },
     castImage: {
@@ -114,4 +114,35 @@ export default makeStyles((theme) => ({
         left: '0px',
         top: '40%',
     },
+    modal1: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      modalContent: {
+        position: 'relative',
+        backgroundColor: theme.palette.background.paper,
+        padding: theme.spacing(3),
+        borderRadius: '8px',
+        width: '400px',
+        textAlign: 'center',
+      },
+      bottomButtonContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: theme.spacing(2),    
+        marginTop: theme.spacing(3),
+        width: '100%',
+      },
+      closeButton: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      submitButton: {
+        display: 'flex',
+        marginLeft: theme.spacing(1), 
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
 }));

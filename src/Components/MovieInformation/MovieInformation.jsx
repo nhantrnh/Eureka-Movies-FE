@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import useStyles from './MovieInformation.style.js'
-import { Modal, Typography, Button, ButtonGroup, Grid, Box, Rating } from '@mui/material';
-import { Movie as MovieIcon, Theaters, Language, PlusOne, Favorite, FavoriteBorderOutlined, Remove, ArrowBack, Close, DesignServicesOutlined, Dns, } from '@mui/icons-material'
+import { Modal, Typography, Button, ButtonGroup, Grid, Box, Rating, IconButton } from '@mui/material';
+import { Movie as MovieIcon, Theaters, Language, PlusOne, Favorite, FavoriteBorderOutlined, Remove, ArrowBack, Close, Close as CloseIcon, DesignServicesOutlined, Dns, } from '@mui/icons-material'
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Helmet } from "react-helmet";
 import axiosInstance from '../../utils/axios';
-import { useGetListQuery, useGetMovieQuery, useGetRecommendationsQuery } from '../../services/TMDB.js';
+import { useGetListQuery, useGetMovieQuery, useGetRecommendationsQuery, useGetFavoriteMoviesQuery, useGetWatchListQuery } from '../../services/TMDB.js';
 import { Loader, MovieList, NotFound } from './../index.js'
 import moviePoster from './../../assests/movie-poster.png'
 import genreIcons from './../../assests/genres/index.js'
@@ -16,7 +16,6 @@ import { useAuthStore } from '../../hooks/useAuthStore.js';
 export default function MovieInformation() {
     const classes = useStyles();
     const dispatch = useDispatch();
-    //const { user } = useSelector(userSelector);
     const [open, setOpen] = useState(false);
     const [isIframeLoading, setIsIframeLoading] = useState(false);
     const [playMovie, setPlayMovie] = useState(false);
@@ -25,24 +24,46 @@ export default function MovieInformation() {
     const [isMovieWatchlisted, setIsMovieWatchlisted] = useState(false);
     const { tmdbId } = useParams();
 
-    const baseUrl = process.env.REACT_APP_API_BASE_URL;
-    const tmdbApiKey = process.env.REACT_APP_TMDB_KEY;
+    // const baseUrl = process.env.REACT_APP_API_BASE_URL;
+    // const tmdbApiKey = process.env.REACT_APP_TMDB_KEY;
    // const sessionId = localStorage.getItem('session_id');
 
    // const { data, isFetching, error } = useGetMovieQuery(tmdbId);
-   // const { data: favoriteMovies } = useGetListQuery({ listName: 'favorite/movies', accountId: user.id, sessionId: sessionId, page: 1 });
-   // const { data: watchlistMovies } = useGetListQuery({ listName: 'watchlist/movies', accountId: user.id, sessionId: sessionId, page: 1 });
+   const { data: favoriteMovies } = useGetFavoriteMoviesQuery({page: 0, maxPerPage: 0});
+   const { data: watchlistMovies } = useGetWatchListQuery({page: 0, maxPerPage: 0});
+   console.log(watchlistMovies);
+   console.log(favoriteMovies);
+   console.log('Favorite Movies:', favoriteMovies);
+    console.log('Watchlist Movies:', watchlistMovies);
   //  const { data: recommendations, isFetching: isRecommendationsFetching } = useGetRecommendationsQuery({ list: 'recommendations', movie_id: tmdbId });
 
   const [data, setData] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState(null);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [rating, setRating] = useState(0); // Store the user's rating
+
+  // Handle rating submission
+const handleRatingSubmit = async () => {
+  try {
+    // Corrected axios post method
+    await axiosInstance.post('/Rating/Add', {
+      stars: rating,        // The user's rating
+      comment: "",          // You can replace this with a dynamic comment if needed
+      tmdbId: tmdbId,       // The ID of the movie
+    });
+    // Close the rating modal after submission
+    setRatingModalOpen(false);
+  } catch (error) {
+    // Log any error that occurs
+    console.error("Error submitting rating:", error);
+  }
+};
 
   const fetchData = async () => {
       setIsFetching(true);
       try {
         const response = await axiosInstance.get(`Movie/Detail/${tmdbId}`);
-        console.log('Response Status:', response.status);
         console.log('Response Data:', response.data.data);
         if (response.data) {
           setData(response.data.data.movie);
@@ -64,24 +85,16 @@ export default function MovieInformation() {
 
     function formatDate(inputDate) {
         const months = [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec"
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ];
-        const [year, month, day] = inputDate.split("-").map(Number);
-        const formattedDate = `${months[month - 1]} ${day} ${year}`;
+    
+        const [year, month, day] = inputDate.split('T')[0].split('-').map(Number);
+        
+        const formattedDate = `${day} ${months[month - 1]} ${year}`;
+        
         return formattedDate;
     }
-
     const [showAll, setShowAll] = useState(false);
 
     // Hàm để toggle việc hiển thị tất cả diễn viên
@@ -91,37 +104,47 @@ export default function MovieInformation() {
   
     const displayedCast = showAll ? data?.credits?.cast : data?.credits?.cast?.slice(0, 6);
   
-    // useEffect(() => {
-    //     setIsMovieFavorited(!!favoriteMovies?.results?.find((movie) => movie?.id === data?.id));
-    // }, [favoriteMovies, data]);
+    useEffect(() => {
+        setIsMovieFavorited(!!favoriteMovies?.results?.find((movie) => movie?.tmdbId === data?.tmdbId));
+    }, [favoriteMovies, data]);
 
-    // useEffect(() => {
-    //     setIsMovieWatchlisted(!!watchlistMovies?.results?.find((movie) => movie?.id === data?.id));
-    // }, [watchlistMovies, data]);
+    useEffect(() => {
+        setIsMovieWatchlisted(!!watchlistMovies?.results?.find((movie) => movie?.tmdbId === data?.tmdbId));
+    }, [watchlistMovies, data]);
+    
+     //   await axiosInstance.post(`${baseUrl}/account/${user?.id}/favorite?api_key=${tmdbApiKey}&session_id=${sessionId}`, {
 
+    async function addToFavorites() {
+        await axiosInstance.post(`/Favorite/Add`, {
+            tmdbId: tmdbId,
+        }).catch((error) => console.log(error));
+        setIsMovieFavorited((prev) => !prev);
+    }
 
-    // async function addToFavorites() {
-    //     await axiosInstance.post(`${baseUrl}/account/${user?.id}/favorite?api_key=${tmdbApiKey}&session_id=${sessionId}`, {
-    //         media_type: 'movie',
-    //         media_id: tmdbId,
-    //         favorite: !isMovieFavorited,
-    //     }).catch((error) => console.log(error));
-    //     setIsMovieFavorited((prev) => !prev);
-    // }
+    async function addToWatchlist() {
+        await axiosInstance.post(`/WatchList/Add`, {
+            tmdbId: tmdbId,
+        }).catch((error) => console.log(error));
+        setIsMovieWatchlisted((prev) => !prev);
+    }
+    async function removeFromFavorites() {
+        await axiosInstance.delete(`/Favorite/Remove/${tmdbId}`, {
+            data: { tmdbId: tmdbId },
+        }).catch((error) => console.log(error));
+        setIsMovieFavorited((prev) => !prev);
+    }
 
-    // async function addToWatchlist() {
-    //     await axiosInstance.post(`${baseUrl}/account/${user?.id}/watchlist?api_key=${tmdbApiKey}&session_id=${sessionId}`, {
-    //         media_type: 'movie',
-    //         media_id: tmdbId,
-    //         watchlist: !isMovieWatchlisted,
-    //     }).catch((error) => console.log(error));
-    //     setIsMovieWatchlisted((prev) => !prev);
-    // }
+    async function removeFromWatchlist() {
+        await axiosInstance.delete(`/WatchList/Remove/${tmdbId}`, {
+            data: { tmdbId: tmdbId },
+        }).catch((error) => console.log(error));
+        setIsMovieWatchlisted((prev) => !prev);
+    }
 
     if (isFetching) return <Loader size='8rem' />
 
     if (error) return <NotFound message='Something has gone wrong - Go back' path='/' />
-
+    console.log('Data:', `https://www.youtube.com/embed/${data?.trailers[0]?.key}`);
     return <>
         {/* <Helmet>
             <title>Film: {data?.title}</title>
@@ -145,11 +168,65 @@ export default function MovieInformation() {
                     <Box display='flex' align='center' >
                         <Rating readOnly value={data?.voteAverage / 2} precision={0.1} />
                         <Typography variant='subtitle1' gutterBottom style={{ marginLeft: '10px' }}>{data?.voteAverage} / 10</Typography>
+                        
                     </Box>
+                    <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setRatingModalOpen(true)}
+          >
+            Your Rate
+          </Button>
                     <Typography variant='h6' align='center' gutterBottom>
-                        {data?.runtime}min / {(data?.releaseDate)} {data?.spoken_languages?.length > 0 ? ` / ${data?.spoken_languages[0]?.name}` : ''}
+                        {data?.runtime}min / {(data?.releaseDate.split('-')[0])} {data?.spoken_languages?.length > 0 ? ` / ${data?.spoken_languages[0]?.name}` : ''}
                     </Typography>
+
+
+          {/* Rating Modal */}
+          <Modal
+  open={ratingModalOpen}
+  onClose={() => setRatingModalOpen(false)}
+  className={classes.modal1}
+>
+  <div className={classes.modalContent}>
+    <Typography variant="h6" gutterBottom>
+      Rate {data?.title}
+    </Typography>
+
+    <Rating
+      value={rating}
+      onChange={(event, newValue) => setRating(newValue)}
+      max={10}
+    />
+
+    {/* Bottom Buttons Container */}
+    <Box className={classes.bottomButtonContainer}>
+  {/* Close Button */}
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={() => setRatingModalOpen(false)}
+    className={classes.closeButton}
+  >
+    Close
+  </Button>
+
+  {/* Submit Button */}
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={handleRatingSubmit}
+    className={classes.submitButton}
+  >
+    Rate
+  </Button>
+</Box>
+
+  </div>
+</Modal>
+
                 </Grid>
+
                 <Grid item className={classes.genresContainer}> {/* Genres Grid */}
                     {data?.genres?.map((genre, index) => (
                         <Link
@@ -208,7 +285,7 @@ export default function MovieInformation() {
                                 <Button
                                     target='_blank'
                                     rel='noopener noreferrer'
-                                    href=''
+                                    href={`https://www.imdb.com/title/${data?.imdbId}`}
                                     endIcon={<Language />}
                                 > IMDB </Button>
                             </ButtonGroup>
@@ -217,7 +294,7 @@ export default function MovieInformation() {
                             <ButtonGroup size='medium' variant='outlined'>
                                 <Button
                                     onClick={() => setOpen(true)} // open trailer videoa
-                                    href=" "
+                                    href=''
                                     endIcon={<Theaters />}
                                     disabled={data?.trailers?.length > 0 ? false : true}
                                 > Trailer </Button>
@@ -235,11 +312,23 @@ export default function MovieInformation() {
                         <Grid item className={classes.buttonsContainer} style={{ marginBottom: '20px', marginLeft: 'auto', marginRight: 'auto' }}>
                             <ButtonGroup size='medium' variant='outlined'>
                                 <Button
-                                   // onClick={addToFavorites}
+                                    onClick={() => {
+                                        if (isMovieFavorited) {
+                                            removeFromFavorites(); 
+                                        } else {
+                                            addToFavorites(); 
+                                        }
+                                    }}
                                     endIcon={isMovieFavorited ? <FavoriteBorderOutlined /> : <Favorite />}
                                 > {isMovieFavorited ? 'Unfavorite' : 'Favorite'} </Button>
                                 <Button
-                                  //  onClick={addToWatchlist}
+                                   onClick={() => {
+                                    if (isMovieWatchlisted) {
+                                        removeFromWatchlist(); 
+                                    } else {
+                                        addToWatchlist(); 
+                                    }
+                                }}
                                     endIcon={isMovieWatchlisted ? <Remove /> : <PlusOne />}
                                 > WatchList </Button>
                             </ButtonGroup>
@@ -315,7 +404,7 @@ export default function MovieInformation() {
 
 
             {/* Modal Trailer Youtube Video */}
-            {data?.videos?.results?.length > 0 && <Modal
+            {data?.trailers?.length > 0 && <Modal
                 closeAfterTransition
                 className={classes.modal}
                 open={open}
