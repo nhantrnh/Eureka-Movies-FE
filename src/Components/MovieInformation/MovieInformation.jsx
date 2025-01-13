@@ -3,16 +3,14 @@ import useStyles from './MovieInformation.style.js'
 import { Modal, Typography, Button, ButtonGroup, Grid, Box, Rating, IconButton } from '@mui/material';
 import { Movie as MovieIcon, Theaters, Language, PlusOne, Favorite, FavoriteBorderOutlined, Remove, ArrowBack, Close, Close as CloseIcon, DesignServicesOutlined, Dns, } from '@mui/icons-material'
 import { Link, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { Helmet } from "react-helmet";
+import { useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axios';
-import { useGetListQuery, useGetMovieQuery, useGetRecommendationsQuery, useGetFavoriteMoviesQuery, useGetWatchListQuery } from '../../services/TMDB.js';
-import { Loader, MovieList, NotFound } from './../index.js'
+import { Loader, NotFound } from './../index.js'
 import moviePoster from './../../assests/movie-poster.png'
 import genreIcons from './../../assests/genres/index.js'
 import { selectGenreOrCategory } from '../../features/currentGenreOrCategory.js';
-import { userSelector } from  '../../features/auth.js';
-import { useAuthStore } from '../../hooks/useAuthStore.js';
+import { useFetchFavoriteList, useFetchWatchList } from '../../api/userAPI.js';
+
 export default function MovieInformation() {
     const classes = useStyles();
     const dispatch = useDispatch();
@@ -20,67 +18,53 @@ export default function MovieInformation() {
     const [isIframeLoading, setIsIframeLoading] = useState(false);
     const [playMovie, setPlayMovie] = useState(false);
     const [movieServer, setMovieServer] = useState(1);
-    const [isMovieFavorited, setIsMovieFavorited] = useState(false);
+    const [isMovieFavorited, setIsMovieFavorited] = useState(true);
     const [isMovieWatchlisted, setIsMovieWatchlisted] = useState(false);
     const { tmdbId } = useParams();
 
-    // const baseUrl = process.env.REACT_APP_API_BASE_URL;
-    // const tmdbApiKey = process.env.REACT_APP_TMDB_KEY;
-   // const sessionId = localStorage.getItem('session_id');
-
-   // const { data, isFetching, error } = useGetMovieQuery(tmdbId);
-   const { data: favoriteMovies } = useGetFavoriteMoviesQuery({page: 0, maxPerPage: 0});
-   const { data: watchlistMovies } = useGetWatchListQuery({page: 0, maxPerPage: 0});
-   console.log(watchlistMovies);
-   console.log(favoriteMovies);
-   console.log('Favorite Movies:', favoriteMovies);
-    console.log('Watchlist Movies:', watchlistMovies);
-  //  const { data: recommendations, isFetching: isRecommendationsFetching } = useGetRecommendationsQuery({ list: 'recommendations', movie_id: tmdbId });
-
-  const [data, setData] = useState(null);
-  const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState(null);
-  const [ratingModalOpen, setRatingModalOpen] = useState(false);
-  const [rating, setRating] = useState(0); // Store the user's rating
-
-  // Handle rating submission
-const handleRatingSubmit = async () => {
-  try {
-    // Corrected axios post method
-    await axiosInstance.post('/Rating/Add', {
-      stars: rating,        // The user's rating
-      comment: "",          // You can replace this with a dynamic comment if needed
-      tmdbId: tmdbId,       // The ID of the movie
-    });
-    // Close the rating modal after submission
-    setRatingModalOpen(false);
-  } catch (error) {
-    // Log any error that occurs
-    console.error("Error submitting rating:", error);
-  }
-};
-
-  const fetchData = async () => {
-      setIsFetching(true);
-      try {
-        const response = await axiosInstance.get(`Movie/Detail/${tmdbId}`);
-        console.log('Response Data:', response.data.data);
-        if (response.data) {
-          setData(response.data.data.movie);
-        } else {
-          console.error('No data returned from API.');
+    const { favoriteMovies, isFetching1, error1, addToFavorites, removeFromFavorites } = useFetchFavoriteList(); // Sử dụng custom hook
+    const { watchList, isFetching2, error3, addToWatches, removeFromWatches } = useFetchWatchList(); // Sử dụng custom hook
+    const [data, setData] = useState(null);
+    const [isFetching, setIsFetching] = useState(false);
+    const [error, setError] = useState(null);
+    const [ratingModalOpen, setRatingModalOpen] = useState(false);
+    const [rating, setRating] = useState(0);
+    let favoriteId = "";
+    let watchListId = "";
+    const handleRatingSubmit = async () => {
+        try {
+            await axiosInstance.post('/Rating/Add', {
+                stars: rating,
+                comment: "",
+                tmdbId: tmdbId,
+            });
+            setRatingModalOpen(false);
+        } catch (error) {
+            console.error("Error submitting rating:", error);
         }
-      } catch (error) {
-        console.error('Error:', error);
-        setError(error);
-      } finally {
-        setIsFetching(false);
-      }
     };
-    
+
+    const fetchData = async () => {
+        setIsFetching(true);
+        try {
+            const response = await axiosInstance.get(`Movie/Detail/${tmdbId}`);
+            console.log('Response Data:', response.data.data);
+            if (response.data) {
+                setData(response.data.data.movie);
+            } else {
+                console.error('No data returned from API.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setError(error);
+        } finally {
+            setIsFetching(false);
+        }
+    };
+
     useEffect(() => {
-      console.log('tmdbId changed:', tmdbId);
-      fetchData();
+        console.log('tmdbId changed:', tmdbId);
+        fetchData();
     }, [tmdbId]);
 
     function formatDate(inputDate) {
@@ -88,63 +72,76 @@ const handleRatingSubmit = async () => {
             "Jan", "Feb", "Mar", "Apr", "May", "Jun",
             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ];
-    
+
         const [year, month, day] = inputDate.split('T')[0].split('-').map(Number);
-        
+
         const formattedDate = `${day} ${months[month - 1]} ${year}`;
-        
+
         return formattedDate;
     }
     const [showAll, setShowAll] = useState(false);
 
-    // Hàm để toggle việc hiển thị tất cả diễn viên
     const handleShowMore = () => {
-      setShowAll(!showAll);
+        setShowAll(!showAll);
     };
-  
+
     const displayedCast = showAll ? data?.credits?.cast : data?.credits?.cast?.slice(0, 6);
-  
+
     useEffect(() => {
-        setIsMovieFavorited(!!favoriteMovies?.results?.find((movie) => movie?.tmdbId === data?.tmdbId));
+        setIsMovieFavorited(!!favoriteMovies?.find(item => item.tmdbId === data?.tmdbId));
     }, [favoriteMovies, data]);
 
     useEffect(() => {
-        setIsMovieWatchlisted(!!watchlistMovies?.results?.find((movie) => movie?.tmdbId === data?.tmdbId));
-    }, [watchlistMovies, data]);
-    
-     //   await axiosInstance.post(`${baseUrl}/account/${user?.id}/favorite?api_key=${tmdbApiKey}&session_id=${sessionId}`, {
+        setIsMovieWatchlisted(!!watchList?.find(item => item.tmdbId === data?.tmdbId));
+    }, [watchList, data]);
 
-    async function addToFavorites() {
-        await axiosInstance.post(`/Favorite/Add`, {
-            tmdbId: tmdbId,
-        }).catch((error) => console.log(error));
+    const handleAddToFavorites = async (movie) => {
+        try {
+            await axiosInstance.post('/Favorite/Add', { tmdbId: movie.tmdbId });
+        } catch (error) {
+            console.error('Error adding to favorites:', error);
+        }
         setIsMovieFavorited((prev) => !prev);
-    }
+        addToFavorites();
+    };
 
-    async function addToWatchlist() {
-        await axiosInstance.post(`/WatchList/Add`, {
-            tmdbId: tmdbId,
-        }).catch((error) => console.log(error));
+
+    const handleAddToWatchlist = async (movie) => {
+        try {
+            await axiosInstance.post('/WatchList/Add', { tmdbId: movie.tmdbId });
+        } catch (error) {
+            console.error('Error adding to favorites:', error);
+        }
         setIsMovieWatchlisted((prev) => !prev);
-    }
-    async function removeFromFavorites() {
-        await axiosInstance.delete(`/Favorite/Remove/${tmdbId}`, {
-            data: { tmdbId: tmdbId },
-        }).catch((error) => console.log(error));
+        addToWatches();
+    };
+
+
+    const handleRemoveFromFavorites = async (targetTmdbId) => {
+        try {
+            favoriteId = favoriteMovies?.find(item => item.tmdbId === targetTmdbId)?.favoriteId;
+            await axiosInstance.delete(`/Favorite/Remove/${favoriteId}`);
+            removeFromFavorites(targetTmdbId);
+        } catch (error) {
+            console.error('Error removing from favorites:', error);
+        }
         setIsMovieFavorited((prev) => !prev);
-    }
-
-    async function removeFromWatchlist() {
-        await axiosInstance.delete(`/WatchList/Remove/${tmdbId}`, {
-            data: { tmdbId: tmdbId },
-        }).catch((error) => console.log(error));
+    };
+    const handleRemoveFromWatchlist = async (targetTmdbId) => {
+        try {
+            watchListId = watchList?.find(item => item.tmdbId === targetTmdbId)?.watchListId;
+            await axiosInstance.delete(`/WatchList/Remove/${watchListId}`);
+            removeFromWatches(targetTmdbId);
+        } catch (error) {
+            console.error('Error removing from favorites:', error);
+        }
         setIsMovieWatchlisted((prev) => !prev);
-    }
+    };
 
     if (isFetching) return <Loader size='8rem' />
 
     if (error) return <NotFound message='Something has gone wrong - Go back' path='/' />
-    console.log('Data:', `https://www.youtube.com/embed/${data?.trailers[0]?.key}`);
+
     return <>
         {/* <Helmet>
             <title>Film: {data?.title}</title>
@@ -168,62 +165,63 @@ const handleRatingSubmit = async () => {
                     <Box display='flex' align='center' >
                         <Rating readOnly value={data?.voteAverage / 2} precision={0.1} />
                         <Typography variant='subtitle1' gutterBottom style={{ marginLeft: '10px' }}>{data?.voteAverage} / 10</Typography>
-                        
+
                     </Box>
                     <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setRatingModalOpen(true)}
-          >
-            Your Rate
-          </Button>
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setRatingModalOpen(true)}
+                    >
+                        Your Rate
+                    </Button>
                     <Typography variant='h6' align='center' gutterBottom>
                         {data?.runtime}min / {(data?.releaseDate.split('-')[0])} {data?.spoken_languages?.length > 0 ? ` / ${data?.spoken_languages[0]?.name}` : ''}
                     </Typography>
 
 
-          {/* Rating Modal */}
-          <Modal
-  open={ratingModalOpen}
-  onClose={() => setRatingModalOpen(false)}
-  className={classes.modal1}
->
-  <div className={classes.modalContent}>
-    <Typography variant="h6" gutterBottom>
-      Rate {data?.title}
-    </Typography>
+                    {/* Rating Modal */}
+                    <Modal
+                        open={ratingModalOpen}
+                        onClose={() => setRatingModalOpen(false)}
+                        className={classes.modal1}
+                    >
+                        <div className={classes.modalContent}>
+                            <Typography variant="h6" gutterBottom>
+                                Rate {data?.title}
+                            </Typography>
 
-    <Rating
-      value={rating}
-      onChange={(event, newValue) => setRating(newValue)}
-      max={10}
-    />
+                            <Rating
+                                value={rating}
+                                onChange={(event, newValue) => setRating(newValue)}
+                                max={10}
+                            />
 
-    {/* Bottom Buttons Container */}
-    <Box className={classes.bottomButtonContainer}>
-  {/* Close Button */}
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={() => setRatingModalOpen(false)}
-    className={classes.closeButton}
-  >
-    Close
-  </Button>
+                            {/* Bottom Buttons Container */}
+                            <Box className={classes.bottomButtonContainer}>
+                                {/* Close Button */}
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => setRatingModalOpen(false)}
+                                    className={classes.closeButton}
+                                >
+                                    Close
+                                </Button>
 
-  {/* Submit Button */}
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={handleRatingSubmit}
-    className={classes.submitButton}
-  >
-    Rate
-  </Button>
-</Box>
+                                {/* Submit Button */}
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleRatingSubmit}
+                                    className={classes.submitButton}
+                                    disabled={rating === 0 ? true : false}
+                                >
+                                    Rate
+                                </Button>
+                            </Box>
 
-  </div>
-</Modal>
+                        </div>
+                    </Modal>
 
                 </Grid>
 
@@ -242,36 +240,36 @@ const handleRatingSubmit = async () => {
                 </Grid>
                 <Typography variant='h5' gutterBottom style={{ marginTop: '10px' }}> Overview </Typography>
                 <Typography style={{ marginBottom: '2rem' }}> {data?.overview} </Typography>
-      <Typography variant="h5" gutterBottom>
-        Top Cast
-      </Typography>
-      <Grid item container spacing={2}> {/* Cast Data Grid */}
-        {displayedCast?.map((character, index) =>
-          character?.profilePath && (
-            <Grid
-              key={index}
-              item
-              xs={4} md={2}
-              component={Link}
-              to={`/actor/${character?.idNumber}`}
-              style={{ textDecoration: 'none' }}
-            >
-              <img
-                className={classes.castImage}
-                src={`${process.env.REACT_APP_IMAGE_BASE_LINK}/${character?.profilePath}`}
-                alt={character?.name}
-              />
-              <Typography color="textPrimary">{character?.name}</Typography>
-              <Typography color="textSecondary">{character?.character?.split('/')[0]}</Typography>
-            </Grid>
-          )
-        )}
-      </Grid>
-      {data?.credits?.cast?.length > 6 && (
-        <Button onClick={handleShowMore} variant="contained" color="primary" style={{ marginTop: '10px' }}>
-          {showAll ? 'Show Less' : 'Show More'}
-        </Button>
-      )}
+                <Typography variant="h5" gutterBottom>
+                    Top Cast
+                </Typography>
+                <Grid item container spacing={2}> {/* Cast Data Grid */}
+                    {displayedCast?.map((character, index) =>
+                        character?.profilePath && (
+                            <Grid
+                                key={index}
+                                item
+                                xs={4} md={2}
+                                component={Link}
+                                to={`/actor/${character?.idNumber}`}
+                                style={{ textDecoration: 'none' }}
+                            >
+                                <img
+                                    className={classes.castImage}
+                                    src={`${process.env.REACT_APP_IMAGE_BASE_LINK}/${character?.profilePath}`}
+                                    alt={character?.name}
+                                />
+                                <Typography color="textPrimary">{character?.name}</Typography>
+                                <Typography color="textSecondary">{character?.character?.split('/')[0]}</Typography>
+                            </Grid>
+                        )
+                    )}
+                </Grid>
+                {data?.credits?.cast?.length > 6 && (
+                    <Button onClick={handleShowMore} variant="contained" color="primary" style={{ marginTop: '10px' }}>
+                        {showAll ? 'Show Less' : 'Show More'}
+                    </Button>
+                )}
                 <Grid item container style={{ marginTop: '2rem' }}> {/* Buttons Grid */}
                     <div className={classes.buttonsContainer}>
                         <Grid item className={classes.buttonsContainer} style={{ marginBottom: '20px', marginLeft: 'auto', marginRight: 'auto' }}>
@@ -301,7 +299,7 @@ const handleRatingSubmit = async () => {
                                 <Button
                                     onClick={() => {
                                         setPlayMovie(true);
-                                        setMovieServer(1); 
+                                        setMovieServer(1);
                                         setIsIframeLoading(true);
                                     }}
                                     endIcon={<MovieIcon />}
@@ -314,21 +312,21 @@ const handleRatingSubmit = async () => {
                                 <Button
                                     onClick={() => {
                                         if (isMovieFavorited) {
-                                            removeFromFavorites(); 
+                                            handleRemoveFromFavorites(data.tmdbId);
                                         } else {
-                                            addToFavorites(); 
+                                            handleAddToFavorites(data);
                                         }
                                     }}
                                     endIcon={isMovieFavorited ? <FavoriteBorderOutlined /> : <Favorite />}
                                 > {isMovieFavorited ? 'Unfavorite' : 'Favorite'} </Button>
                                 <Button
-                                   onClick={() => {
-                                    if (isMovieWatchlisted) {
-                                        removeFromWatchlist(); 
-                                    } else {
-                                        addToWatchlist(); 
-                                    }
-                                }}
+                                    onClick={() => {
+                                        if (isMovieWatchlisted) {
+                                            handleRemoveFromWatchlist(data.tmdbId);
+                                        } else {
+                                            handleAddToWatchlist(data);
+                                        }
+                                    }}
                                     endIcon={isMovieWatchlisted ? <Remove /> : <PlusOne />}
                                 > WatchList </Button>
                             </ButtonGroup>
@@ -353,21 +351,21 @@ const handleRatingSubmit = async () => {
                 disableBackdropClick
             >
                 <div className={classes.movieModelDiv} >
-                    <Grid item className={classes.buttonsContainer} style={{justifyContent: 'space-between'}}>
+                    <Grid item className={classes.buttonsContainer} style={{ justifyContent: 'space-between' }}>
                         <ButtonGroup size='small' variant='contained' >
                             <Button
                                 onClick={() => {
-                                    if(movieServer==2){
-                                        setMovieServer(1); 
+                                    if (movieServer == 2) {
+                                        setMovieServer(1);
                                         setIsIframeLoading(true);
                                     }
                                 }}
                                 endIcon={<Dns />}
                             > Server 1 </Button>
                             <Button
-                                onClick={() =>  {
-                                    if(movieServer==1){
-                                        setMovieServer(2); 
+                                onClick={() => {
+                                    if (movieServer == 1) {
+                                        setMovieServer(2);
                                         setIsIframeLoading(true);
                                     }
                                 }}
@@ -381,10 +379,10 @@ const handleRatingSubmit = async () => {
                             > Close </Button>
                         </ButtonGroup>
                     </Grid>
-                    <div style={{width: '100%', height: '100%', position: 'relative'}}>
+                    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                         {isIframeLoading && <div className={classes.movieLoader} >
                             <Loader size='4rem' />
-                        </div> }
+                        </div>}
                         <iframe
                             autoPlay
                             frameBorder='0'
@@ -396,7 +394,7 @@ const handleRatingSubmit = async () => {
                             width="100%"
                             height="100%"
                             onLoad={() => setIsIframeLoading(false)}
-                            style={{backgroundColor: "black"}}
+                            style={{ backgroundColor: "black" }}
                         />
                     </div>
                 </div>

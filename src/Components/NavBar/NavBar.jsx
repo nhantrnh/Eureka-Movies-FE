@@ -100,17 +100,8 @@ export default function NavBar() {
                             onChange={handleLogout} // You can modify this to handle your logout if needed
                             sx={{ color: 'white', ml: 2 }}
                         >
-                            <MenuItem value="profile" component={Link} to={`/profile/${user?.id}`}>
+                            <MenuItem value="profile" component={Link} to={`/profile`}>
                                 User Profile
-                            </MenuItem>
-                            <MenuItem component={Link} to="/watchlist">
-                                Watchlist
-                            </MenuItem>
-                            <MenuItem component={Link} to="/favorites">
-                                Favorite List
-                            </MenuItem>
-                            <MenuItem component={Link} to="/ratings">
-                                Rating List
                             </MenuItem>
                             <MenuItem onClick={handleLogout}>
                                 Logout

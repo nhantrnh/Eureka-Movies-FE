@@ -23,7 +23,7 @@ function App() {
             <Route path='/' element={<PublicRoute><Movies /></PublicRoute>} />
             <Route path='/movie/:tmdbId' element={<PrivateRoute><MovieInformation /></PrivateRoute>} />
             <Route path='/actor/:id' element={<PrivateRoute><Actors /></PrivateRoute>} />
-            <Route path='/profile/:id' element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path='/profile' element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path='*' element={<PublicRoute><NotFound /></PublicRoute>} />
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/signup" element={<PublicRoute><Register /></PublicRoute>} />
