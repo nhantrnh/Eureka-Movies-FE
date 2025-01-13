@@ -3,16 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import axiosInstance from "../../utils/axios";
 import { useState } from "react";
-import { useDispatch, useSelector } from 'react-redux';
-import { setUser, logout, setSessionId, userSelector } from '../../features/auth';
+import { useDispatch } from 'react-redux';
+import { setUser, setEmail } from '../../features/auth';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const dispatch = useDispatch();
-
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const setEmail = useAuthStore((state) => state.setEmail);
+
   const login = async (values) => {
     setLoading(true);
     try {
@@ -33,55 +34,31 @@ const Login = () => {
     setLoading(false);
   };
 
-  const handleSocialLogin = (provider) => {
-    const clientId = provider === "google" ? process.env.REACT_APP_GOOGLE_CLIENT_ID : process.env.REACT_APP_FACEBOOK_APP_ID;
-    const redirectUri = "http://localhost:3000/social-login-callback";
-    const authUrl =
-      provider === "google"
-        ? `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid email profile`
-        : `https://www.facebook.com/v10.0/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email,public_profile`;
-
-    const width = 600;
-    const height = 600;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-
-    const newWindow = window.open(
-      authUrl,
-      "_blank",
-      `width=${width},height=${height},top=${top},left=${left}`
-    );
-
-    const interval = setInterval(() => {
-      if (newWindow.closed) {
-        clearInterval(interval);
-        // Handle social login callback
-        handleSocialLoginCallback();
-      }
-    }, 1000);
+  const handleGoogleLoginSuccess = async (response) => {
+    try {
+      console.log(`response: ${JSON.stringify(response)}`);
+      const result = await axiosInstance.post("/Authentication/LoginSocial", {
+        jwtString: response.credential,
+      });
+      notification.success({
+        message: result?.data?.message,
+        description: "Social login successfully!",
+      });
+      setAccessToken(result?.data?.data?.accessToken);
+      setEmail(result?.data?.data?.email);
+      navigate("/");
+    } catch (error) {
+      notification.error({
+        message: error?.response?.data?.message,
+      });
+    }
   };
 
-  const handleSocialLoginCallback = async () => {
-    const params = new URLSearchParams(window.location.search);
-    const authorizeCode = params.get("code");
-    if (authorizeCode) {
-      try {
-        const result = await axiosInstance.post("/Authentication/LoginSocial", {
-          authorizeCode,
-        });
-        notification.success({
-          message: result?.data?.message,
-          description: "Social login successfully!",
-        });
-        setAccessToken(result?.data?.data?.accessToken);
-        setEmail(result?.data?.data?.email);
-        navigate("/");
-      } catch (error) {
-        notification.error({
-          message: error?.response?.data?.message,
-        });
-      }
-    }
+  const handleGoogleLoginError = (error) => {
+    notification.error({
+      message: "Google login failed",
+      description: error?.message || "Please try again.",
+    });
   };
 
   return (
@@ -91,22 +68,15 @@ const Login = () => {
         onFinish={login}
         disabled={loading}
         name="basic"
-        labelCol={{
-          span: 8,
-        }}
-        wrapperCol={{
-          span: 16,
-        }}
-        style={{
-          maxWidth: 600,
-        }}
+        labelCol={{ span: 8 }}
+        wrapperCol={{ span: 16 }}
+        style={{ maxWidth: 600 }}
         autoComplete="off"
       >
         <Form.Item
           label="Email"
           name="email"
-          rules={[{ required: true, type: "email", message: "Invalid email" }]}
-        >
+          rules={[{ required: true, type: "email", message: "Invalid email" }]}>
           <Input />
         </Form.Item>
 
@@ -116,39 +86,57 @@ const Login = () => {
           rules={[
             { required: true, message: "Password is required" },
             { min: 6, message: "Password must be at least 6 characters" },
-          ]}
-        >
+          ]}>
           <Input.Password />
         </Form.Item>
 
-        <Form.Item
-          wrapperCol={{
-            offset: 8,
-            span: 16,
-          }}
-        >
+        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
           <div style={{ marginBottom: 10 }}>
-            Don't have account? <Link to={"/register"}>Register</Link>
+            Don't have an account? <Link to={"/register"}>Register</Link>
           </div>
           <div style={{ marginBottom: 10 }}>
             <Link to={"/forgot-password"}>Forgot Password?</Link>
           </div>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" block>
             Submit
           </Button>
+
+          <div style={{ marginTop: 15 }}>
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={handleGoogleLoginError}
+              useOneTap
+              render={({ onClick }) => (
+                <Button
+                  onClick={onClick}
+                  type="default"
+                  style={{
+                    width: "100%",
+                    height: "35px",
+                    fontWeight: "bold",
+                    backgroundColor: "#fff",
+                    border: "1px solid #d9d9d9",
+                    borderRadius: "5px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/5/51/Google.png"
+                    alt="Google Icon"
+                    style={{
+                      width: 20,
+                      marginRight: 8,
+                    }}
+                  />
+                  Login with Google
+                </Button>
+              )}
+            />
+          </div>
         </Form.Item>
       </Form>
-      <div style={{ textAlign: 'center', marginTop: 20 }}>
-        <Button
-          style={{ marginRight: 10 }}
-          onClick={() => handleSocialLogin("google")}
-        >
-          Login with Google
-        </Button>
-        <Button onClick={() => handleSocialLogin("facebook")}>
-          Login with Facebook
-        </Button>
-      </div>
     </>
   );
 };
