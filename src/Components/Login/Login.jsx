@@ -1,10 +1,13 @@
 import { Button, Form, Input, notification } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../hooks/useAuthStore";
-import axios from "axios";
+import axiosInstance from "../../utils/axios";
 import { useState } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser, logout, setSessionId, userSelector } from '../../features/auth';
 
 const Login = () => {
+  const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -13,12 +16,13 @@ const Login = () => {
   const login = async (values) => {
     setLoading(true);
     try {
-      const result = await axios.post("http://localhost:5084/api/Authentication/Login", values);
+      const result = await axiosInstance.post("/Authentication/Login", values);
       notification.success({
         message: result?.data?.message,
         description: "Login successfully!",
       });
-      setAccessToken(result?.data?.data?.access_token);
+      setAccessToken(result?.data?.data?.accessToken);
+      dispatch(setUser(result?.data?.data));
       setEmail(result?.data?.data?.email);
       navigate("/");
     } catch (error) {
@@ -62,14 +66,14 @@ const Login = () => {
     const authorizeCode = params.get("code");
     if (authorizeCode) {
       try {
-        const result = await axios.post("http://localhost:5084/api/Authentication/LoginSocial", {
+        const result = await axiosInstance.post("/Authentication/LoginSocial", {
           authorizeCode,
         });
         notification.success({
           message: result?.data?.message,
           description: "Social login successfully!",
         });
-        setAccessToken(result?.data?.data?.access_token);
+        setAccessToken(result?.data?.data?.accessToken);
         setEmail(result?.data?.data?.email);
         navigate("/");
       } catch (error) {

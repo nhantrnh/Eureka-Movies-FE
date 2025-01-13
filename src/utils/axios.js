@@ -1,34 +1,39 @@
-import axios from 'axios';
+import axios from "axios"
+import { useAuthStore } from '../hooks/useAuthStore'; // Đường dẫn tới useAuthStore của bạn
 
-const instance = axios.create({
-    baseURL: process.env.REACT_APP_SERVER_HTTPS_URL,
-});
+export const TOKEN_KEY = "accessToken"
 
-// Un-comment this in case you want to pass cookies to the server through req.headers
-// instance.defaults.withCredentials = true;
-// instance.defaults.headers.common['Authorization'] = `Bearer ` + localStorage.getItem('accessToken');
+const axiosInstance = axios.create({
+  baseURL: process.env.REACT_APP_API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
 
-//REQUEST
-instance.interceptors.request.use((config) => {
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const accessToken = useAuthStore.getState().accessToken;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
     return config;
-}, (err) => {
-    return Promise.reject(err);
-});
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-
-//RESPONSE
-instance.interceptors.response.use((response) => {
-    return {
-        ...response.data,
-        statusCode: response.status,
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("Unauthorized: Redirecting to login page")
+      useAuthStore.setState({ accessToken: null });
+      window.location.href = "/login"
     }
-}, (err) => {
-    let msg = err.response.data.message;
-    if (msg) {
-        err.message = msg;
-    }
-    return Promise.reject(new Error(msg));
-});
+    return Promise.reject(error)
+  }
+)
 
-
-export default instance;
+export default axiosInstance;

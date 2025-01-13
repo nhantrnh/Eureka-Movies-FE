@@ -1,21 +1,17 @@
 
 
-import axios from '../utils/axios';
+import axiosInstance from '../utils/axios';
 
-export const moviesApi = axios.create({
+export const moviesApi = axiosInstance.create({
     baseURL: process.env.REACT_APP_API_BASE_URL,
-    params: {
-        api_key: process.env.REACT_APP_TMDB_KEY,
-    },
 });
 
 export const fetchToken = async () => { 
     try {
-        const { data } = await moviesApi.get('/authentication/token/new');
-        const token = data?.request_token;
+        const { data } = await moviesApi.post('/Authentication/Login');
+        const token = data?.accessToken;
         if(data.success){
-            localStorage.setItem('request_token', token);
-            window.location.href = `https://www.themoviedb.org/authenticate/${token}?redirect_to=${window.location.origin}/approved`;
+            localStorage.setItem('accessToken', token);
         }
     } catch (error) {
         console.log('Sorry, your token could not be created.');
@@ -24,12 +20,12 @@ export const fetchToken = async () => {
 
 
 export const createSessionId = async () => {
-    const token = localStorage.getItem('request_token');
+    const token = localStorage.getItem('accessToken');
 
     if(token) {
         try {
-            const { data: { session_id } } = await moviesApi.post('/authentication/session/new', {
-                request_token: token,
+            const { data: { session_id } } = await moviesApi.post('/Authentication/Login', {
+                accessToken: token,
             });
             localStorage.setItem('session_id', session_id);
             return session_id;

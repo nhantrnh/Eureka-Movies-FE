@@ -1,5 +1,5 @@
 import { Button, Form, Input, notification } from "antd";
-import axios from "axios";
+import axiosInstance from "../../utils/axios";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -9,7 +9,7 @@ const Register = () => {
   const register = async (values) => {
     setLoading(true);
     try {
-      const result = await axios.post("http://localhost:5084/api/Authentication/Register", values);
+      const result = await axiosInstance.post("/Authentication/Register", values);
 
       notification.success({
         message: result?.data?.message,

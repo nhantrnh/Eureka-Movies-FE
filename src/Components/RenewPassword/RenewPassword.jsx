@@ -1,5 +1,5 @@
 import { Button, Form, Input, notification } from "antd";
-import axios from "axios";
+import axiosInstance from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -10,7 +10,7 @@ const RenewPassword = () => {
   const handleRenewPassword = async (values) => {
     setLoading(true);
     try {
-      await axios.post("http://localhost:5084/api/Authentication/RenewPassword", values);
+      await axiosInstance.post("http://localhost:5084/api/Authentication/RenewPassword", values);
       notification.success({
         message: "Password Updated",
         description: "Your password has been successfully updated.",

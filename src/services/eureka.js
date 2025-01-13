@@ -3,87 +3,14 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 const tmdbApiKey = process.env.REACT_APP_TMDB_KEY;
 
-export const tmdbApi = createApi({
-    reducerPath: 'tmdbApi',
-    baseQuery: fetchBaseQuery({ baseUrl: process.env.REACT_APP_API_BASE_URL }),
+export const eureka = createApi({
+    reducerPath: 'eureka',
+    baseQuery: fetchBaseQuery({ baseUrl: process.env.REACT_APP_API_BASE_URL1 }),
     endpoints: (builder)=>({
 
         // * Get Genres
         getGenres: builder.query({
             query: ()=> `/genre/movie/list?api_key=${tmdbApiKey}`
-        }),
-
-        //* Get Movies by [Type]
-        getMovies: builder.query({
-            query: ({ genreIdOrCategoryName, page, maxPerPage, searchQuery, generalId })=> {
-
-                // Get all movies
-                if(genreIdOrCategoryName === 'Home' && !searchQuery && !generalId){
-                    return `/Movie/Movies?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-                }
-
-                //* Get Movies by Search
-                if(searchQuery){
-                    return `/Movie/Movies?Keyword=${searchQuery}&GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-                }
-                
-                //* Get Movies by Category
-                if(genreIdOrCategoryName && genreIdOrCategoryName !== 'Home' && typeof genreIdOrCategoryName === 'string') {
-                    return  `/Movie/${genreIdOrCategoryName}?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-                }
-
-                //* Get Movies by Genre
-                if(!searchQuery && generalId) {
-                    return `/Movie/Movies?GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-                }
-
-                //* Get Popular Movies
-                return `/Movie/Popular?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-
-            }
-        }),
-
-        //* Get Movie
-        getMovie: builder.query({
-            query: (id)=> `/Movie/Detail/${id}`,
-        }),
-
-        getFavoriteMovies: builder.query({
-            query: ({page, maxPerPage}) => `/Movie/Favorite?PageNumber=${page}&MaxPerPage=${maxPerPage}`
-        }),
-
-        getActingList: builder.query({
-            query: ({ keywords, page, maxPerPage }) => `/People/ActingList?Keywords=${keywords}&PageNumber=${page}&MaxPerPage=${maxPerPage}`
-        }),
-
-        getActingListByFilm: builder.query({
-            query: ({ tmdbId }) => `/People/Cast/${tmdbId}`
-        }),
-
-        getReviews: builder.query({
-            query: ({ tmdbId, page, maxPerPage }) => 
-            {
-                if (tmdbId) {
-                    return `/Rating/GetReviews?TmdbId=${tmdbId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-                }
-                return `/Rating/GetRatingList?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-            }
-        }),
-
-        // http://localhost:5084/api/Recommendation/Navigation?request=h
-
-        getRecommendationNavigation: builder.query({
-            query: (request) => `/Recommendation/Navigation?request=${request}`
-        }),
-
-        //http://localhost:5084/api/Recommendation/LLMSearch?Collection=user&Query=b&Amount=10&Threshold=11
-
-        getRecommendationLLMSearch: builder.query({
-            query: ({ collection, query, amount, threshold }) => `/Recommendation/LLMSearch?Collection=${collection}&Query=${query}&Amount=${amount}&Threshold=${threshold}`
-        }),
-
-        getWatchList: builder.query({
-            query: ({page, maxPerPage}) => `/WatchList/GetWatchList?PageNumber=${page}&MaxPerPage=${maxPerPage}`
         }),
 
         //* Get User Specific Lists
@@ -110,21 +37,11 @@ export const tmdbApi = createApi({
 
 export const { 
     useGetGenresQuery, 
-    useGetMoviesQuery, 
-    useGetMovieQuery, 
     useGetListQuery, 
     useGetRecommendationsQuery, 
     useGetActorsDetailsQuery, 
     useGetMoviesByActorIdQuery, 
-    useGetFavoriteMoviesQuery,
-    useGetActingListQuery,
-    useGetActingListByFilmQuery,
-    useGetReviewsQuery,
-    useGetRecommendationNavigationQuery,
-    useGetRecommendationLLMSearchQuery,
-    useGetWatchListQuery,
-    useGetTrendingMoviesQuery
-} = tmdbApi;
+} = eureka;
 
 
 // import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'

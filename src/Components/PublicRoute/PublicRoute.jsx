@@ -8,7 +8,7 @@ const PublicRoute = ({ children }) => {
 
   useEffect(() => {    
     if (accessToken) {
-      navigate("/movies");
+      navigate("/");
     }
   }, [navigate]);
 

@@ -1,5 +1,5 @@
 import { Button, Form, Input, notification } from "antd";
-import axios from "axios";
+import axiosInstance from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -10,7 +10,7 @@ const ForgotPassword = () => {
   const handleForgotPassword = async (values) => {
     setLoading(true);
     try {
-      const result = await axios.get(`http://localhost:5084/api/Authentication/ForgotPassword?email=${values.email}`);
+      const result = await axiosInstance.get(`http://localhost:5084/api/Authentication/ForgotPassword?email=${values.email}`);
       notification.success({
         message: result?.data?.message,
         description: "Check your email for the reset code.",

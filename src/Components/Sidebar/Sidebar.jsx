@@ -11,14 +11,12 @@ import { selectGenreOrCategory } from '../../features/currentGenreOrCategory.js'
 import logo from './../../assests/logo.png';
 
 const categories = [
-    { label: 'Home', value: 'Home'},
-    { label: 'Popular', value: 'Popular' },
-    { label: 'Trending Day', value: 'TrendingDay' },
-    { label: 'Trending Week', value: 'TrendingWeek' },
-    { label: 'Lasted Trailers', value: 'LatestTrailers' },
+    { label: 'Home', value: 'Home', icon: 'adventure' },
+    { label: 'Popular', value: 'Popular', icon: 'popular' },
+    { label: 'Trending Day', value: 'TrendingDay', icon: 'documentary' },
+    { label: 'Trending Week', value: 'TrendingWeek', icon: 'history' },
+    { label: 'Lasted Trailers', value: 'LatestTrailers', icon: 'tv movie' },
 ];
-
-
 
 export default function Sidebar({ setMobileOpen }) {
     const classes = useStyles();
@@ -46,11 +44,11 @@ export default function Sidebar({ setMobileOpen }) {
             <ListSubheader>
                 Categories
             </ListSubheader>
-            {categories.map(({ label, value }) => (
+            {categories.map(({ label, value, icon }) => (
                 <Link key={value} className={classes.links} to={`/`} >
                     <ListItem onClick={() => dispatch(selectGenreOrCategory(value))} button>
                         <ListItemIcon>
-                            <img src={genreIcons[value.toLowerCase()]} alt="icon" className={classes.genereImages} height={30} />
+                            <img src={genreIcons[icon.toLowerCase()]} alt="icon" className={classes.genereImages} height={30} />
                         </ListItemIcon>
                         <ListItemText primary={label} />
                     </ListItem>
