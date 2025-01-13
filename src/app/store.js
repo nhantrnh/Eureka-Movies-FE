@@ -4,6 +4,8 @@ import { tmdbApi } from "../services/TMDB.js";
 import { eureka } from "../services/eureka.js";
 
 import genreOrCategoryReducer from './../features/currentGenreOrCategory.js'
+import actorReducer from './../features/actor.js'
+
 import  useReducer from "./../features/auth.js";
 
 export default configureStore({
@@ -11,6 +13,7 @@ export default configureStore({
         [tmdbApi.reducerPath]: tmdbApi.reducer,
         [eureka.reducerPath]: eureka.reducer,
         curruntGenreOrCategory: genreOrCategoryReducer,
+        currentActor: actorReducer,
         user: useReducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(tmdbApi.middleware, eureka.middleware), // Add RTK-Query middleware here

@@ -9,7 +9,7 @@ import genreIcons from './../../assests/genres/index.js'
 import { useDispatch, useSelector } from 'react-redux';
 import { selectGenreOrCategory } from '../../features/currentGenreOrCategory.js';
 import logo from './../../assests/logo.png';
-
+import { selectList } from '../../features/actor.js';
 const categories = [
     { label: 'Home', value: 'Home', icon: 'adventure' },
     { label: 'Popular', value: 'Popular', icon: 'popular' },
@@ -56,6 +56,14 @@ export default function Sidebar({ setMobileOpen }) {
             ))}
         </List>
         <Divider />
+            <List>
+                <ListItem button component={Link} to="/actors">
+                    <ListItemIcon>
+                        <img src={genreIcons['comedy']} alt="icon" className={classes.genereImages} height={30} />
+                    </ListItemIcon>
+                    <ListItemText primary='Actors' />
+                </ListItem>
+            </List>
         <Divider />
         <Footer />
 

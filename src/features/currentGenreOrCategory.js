@@ -25,6 +25,8 @@ export const genreOrCategory = createSlice({
         selectGenre: (state, action)=>{
             state.generalId = action.payload;
         }
+        
+
     },
 });
 

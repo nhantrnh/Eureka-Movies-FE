@@ -23,3 +23,4 @@ export { default as RenewPassword } from './RenewPassword/RenewPassword.jsx';
 export { default as ForgotPassword } from './ForgotPassword/ForgotPassword.jsx';
 export { default as PrivateRoute } from './PrivateRoute/PrivateRoute.jsx';
 export { default as PublicRoute } from './PublicRoute/PublicRoute.jsx';
+export { default as ActorsList } from './ActorsList/ActorsList.jsx';

@@ -3,21 +3,26 @@ import useStyles from './Search.style.js'
 import { TextField, InputAdornment } from '@mui/material'
 import { Search as SearchIcon } from '@mui/icons-material'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { searchMovie } from '../../features/currentGenreOrCategory.js'
-
+import { searchActor } from '../../features/actor.js'
 
 export default function Search() {
     const classes = useStyles();
+    const location = useLocation(); 
 
     const [query, setQuery] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     function handleKeyPress(e) {
-        if(e.key === 'Enter') {
-            dispatch(searchMovie(query));
-            navigate('/');
+        if (e.key === 'Enter') {
+            if (location.pathname === '/actors') {
+                dispatch(searchActor(query));
+            } else {
+                dispatch(searchMovie(query));
+                navigate('/');
+            }
         }
     }
 

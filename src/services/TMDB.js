@@ -53,8 +53,14 @@ export const tmdbApi = createApi({
         }),
 
         getActingList: builder.query({
-            query: ({ keywords, page, maxPerPage }) => `/People/ActingList?Keywords=${keywords}&PageNumber=${page}&MaxPerPage=${maxPerPage}`
+            query: ({ actorlistID, searchQuery, page, maxPerPage }) => {
+                if (!searchQuery) {
+                    return `/People/ActingList?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                }
+                return `/People/ActingList?Keyword=${searchQuery}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+            }
         }),
+
 
         getActingListByFilm: builder.query({
             query: ({ tmdbId }) => `/People/Cast/${tmdbId}`
