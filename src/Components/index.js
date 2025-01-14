@@ -28,3 +28,5 @@ export { default as WatchingList } from './WatchingList/WatchingList.jsx';
 export { default as FavoriteList } from './FavoriteList/FavoriteList.jsx';
 export { default as ActorsMovieList } from './ActorsMovieList/ActorsMovieList.jsx';
 export { default as RatingList } from './RatingList/RatingList.jsx';
+export { default as AdvancedSearch } from './AdvancedSearch/AdvancedSearch.jsx';
+export { default as UserHistory } from './UserHistory/UserHistory.jsx';

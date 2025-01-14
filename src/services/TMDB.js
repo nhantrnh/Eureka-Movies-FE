@@ -15,31 +15,36 @@ export const tmdbApi = createApi({
 
         //* Get Movies by [Type]
         getMovies: builder.query({
-            query: ({ genreIdOrCategoryName, page, maxPerPage, searchQuery, generalId })=> {
+            query: ({ genreIdOrCategoryName, page, maxPerPage, searchQuery, generalId, type })=> {
 
-                // Get all movies
-                if(genreIdOrCategoryName === 'Home' && !searchQuery && !generalId){
-                    return `/Movie/Movies?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                if (type === 'LLM') {
+                    return `/Recommendation/LLMSearch?Collection=movies&Query=${searchQuery}&Amount=${maxPerPage}&Threshold=0.25`
                 }
+                else {
+                    // Get all movies
+                    if(genreIdOrCategoryName === 'Home' && !searchQuery && !generalId){
+                        return `/Movie/Movies?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                    }
 
-                //* Get Movies by Search
-                if(searchQuery){
-                    return `/Movie/Movies?Keyword=${searchQuery}&GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                    //* Get Movies by Search
+                    if(searchQuery){
+                        return `/Movie/Movies?Keyword=${searchQuery}&GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                    }
+
+                    //* Get Movies by Category
+                    if(genreIdOrCategoryName && genreIdOrCategoryName !== 'Home' && typeof genreIdOrCategoryName === 'string') {
+                        return  `/Movie/${genreIdOrCategoryName}?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                    }
+
+                    //* Get Movies by Genre
+                    if(!searchQuery && generalId) {
+                        return `/Movie/Movies?GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+                    }
+                    //* Get Popular Movies
+                    return `/Movie/Popular?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
+
                 }
                 
-                //* Get Movies by Category
-                if(genreIdOrCategoryName && genreIdOrCategoryName !== 'Home' && typeof genreIdOrCategoryName === 'string') {
-                    return  `/Movie/${genreIdOrCategoryName}?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-                }
-
-                //* Get Movies by Genre
-                if(!searchQuery && generalId) {
-                    return `/Movie/Movies?GeneralId=${generalId}&PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-                }
-
-                //* Get Popular Movies
-                return `/Movie/Popular?PageNumber=${page}&MaxPerPage=${maxPerPage}`;
-
             }
         }),
 

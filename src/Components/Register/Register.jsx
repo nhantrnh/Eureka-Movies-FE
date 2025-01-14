@@ -9,7 +9,12 @@ const Register = () => {
   const register = async (values) => {
     setLoading(true);
     try {
-      const result = await axiosInstance.post("/Authentication/Register", values);
+      const data = {
+        ...values,
+        avatar: "https://example.com/default-avatar.png",
+      };
+
+      const result = await axiosInstance.post("/Authentication/Register", data);
 
       notification.success({
         message: result?.data?.message,
@@ -45,6 +50,14 @@ const Register = () => {
         }}
         autoComplete="off"
       >
+                <Form.Item
+          label="Name"
+          name="displayname"
+          rules={[{ required: true, message: "Name is required" }]}
+        >
+          <Input />
+        </Form.Item>
+        
         <Form.Item
           label="Email"
           name="email"
@@ -53,21 +66,6 @@ const Register = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item
-          label="Name"
-          name="displayname"
-          rules={[{ required: true, message: "Name is required" }]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          label="Avatar"
-          name="avatar"
-          rules={[{ required: true, message: "Hobby is required" }]}
-        >
-          <Input />
-        </Form.Item>
         <Form.Item
           label="Password"
           name="password"

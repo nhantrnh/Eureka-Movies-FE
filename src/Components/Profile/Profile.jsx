@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo  } from 'react';
 import useStyles from './Profile.style.js';
 import { Box, Button, Typography } from '@mui/material';
-import { ExitToApp } from '@mui/icons-material';
 import { Loader, RatedCards } from './../index.js';
 import { Helmet } from 'react-helmet';
 import { useFetchWatchList } from '../../api/userAPI.js';
-import { useFetchFavoriteList } from '../../api/userAPI.js';
+import { useFetchFavoriteList, useFetchMovieRecommendations } from '../../api/userAPI.js';
 import { useFetchRating } from '../../api/userAPI.js';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -13,14 +12,23 @@ export default function Profile() {
     const classes = useStyles();
     const navigate = useNavigate();
 
-    const [favoritePage, setFavoritePage] = useState(1);
-    const [watchlistPage, setWatchlistPage] = useState(1);
-    const [ratingPage, setRatingPage] = useState(1);
+    const { watchList, isFetching3 } = useFetchWatchList();
+    const { favoriteMovies, isFetching1 } = useFetchFavoriteList();
+    const { ratings, isFetchingRatings, fetchRatingList } = useFetchRating();
 
-    const { watchList, isFetching3, error3, addToWatches, removeFromWatches } = useFetchWatchList();
-    const { favoriteMovies, isFetching1, error1, addToFavorites, removeFromFavorites } = useFetchFavoriteList();
-    const { ratings, isFetchingRatings, errorRatings, fetchRatingList } = useFetchRating();
-
+    const displayText = watchList?.map((item) => {
+        const overview = item.movie?.overview;
+        // If 'overview' exists, use its first 300 characters; otherwise, use the movie's title
+        return overview ? overview.substring(0, 500) : item.movie?.title;
+    }).join(',') || '';
+    const { recommendations } = useFetchMovieRecommendations(displayText); // Sử dụng custom hook
+    const filteredRecommendations = useMemo(() => {
+        if (!recommendations || !watchList) return [];
+        
+        const watchListIds = new Set(watchList.map(item => item.movie.id));
+        
+        return recommendations.filter(rec => !watchListIds.has(rec.id));
+    }, [recommendations, watchList]);
 
     useEffect(() => {
         fetchRatingList("", "");
@@ -29,11 +37,6 @@ export default function Profile() {
     const handleViewAll = (type) => {
         navigate(`/profile/${type}`);
     };
-
-    function logout() {
-        localStorage.clear();
-        window.location.href = '/';
-    }
 
     if (isFetching3 || isFetching1 || isFetchingRatings) {
         return <Loader size="8rem" />;
@@ -51,12 +54,45 @@ export default function Profile() {
                     </Typography>
                 </Box>
 
-                {!favoriteMovies?.length && !watchList?.length ? (
+                {!favoriteMovies?.length && !watchList?.length && !ratings?.length && filteredRecommendations?.length ? (
                     <Typography variant="h5">
                         Add favorite or watchlist some movies to see them here!
                     </Typography>
                 ) : (
                     <Box>
+                          {/* Recommendations */}
+                          {filteredRecommendations?.length ? (
+                             <Box>
+                             <Typography variant="h5">Recommendations Base On Your History</Typography>
+                             <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gap={2}>
+                                 {filteredRecommendations.map((movie) => (
+                                     <Box key={movie.tmdbId} display="flex" flexDirection="column" alignItems="center">
+                                         <Link
+                                             key={movie.tmdbId}
+                                             to={`/movie/${movie.tmdbId}`}
+                                             style={{ textDecoration: 'none' }}
+                                         >
+                                             <img
+                                                 src={movie.posterPath ? `${process.env.REACT_APP_IMAGE_BASE_LINK}${movie.posterPath}` : 'default_image_path.jpg'}
+                                                 alt={movie.title}
+                                                 style={{ width: '100%', height: 'auto', borderRadius: '4px' }}
+                                             />
+                                             <Typography variant="body1" sx={{ mt: 1 }}>
+                                                 {movie.title}
+                                             </Typography>
+                                             <Typography variant="body2" color="textSecondary">
+                                                 {new Date(movie.releaseDate).getFullYear()}
+                                             </Typography>
+                                         </Link>
+                                     </Box>
+                                 ))}
+                             </Box>
+                             <Button onClick={() => handleViewAll('recommendations')} color="primary" style={{ marginLeft: '1rem' }}>
+                                 See More
+                             </Button>
+                         </Box>
+                        ) : null}
+
                         {/* Watchlist */}
                         {watchList?.length ? (
                             <Box>
@@ -154,6 +190,7 @@ export default function Profile() {
                                 </Button>
                             </Box>
                         ) : null}
+
                     </Box>
                 )}
             </Box>

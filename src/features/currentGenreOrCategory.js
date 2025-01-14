@@ -10,6 +10,7 @@ export const genreOrCategory = createSlice({
         searchQuery: '',
         maxPerPage: 20,
         generalId: '',
+        type: ''
     },
     reducers: {
         selectGenreOrCategory: (state, action)=>{
@@ -24,12 +25,14 @@ export const genreOrCategory = createSlice({
         },
         selectGenre: (state, action)=>{
             state.generalId = action.payload;
+        },
+        searchMovieLLM: (state, action)=>{
+            state.searchQuery = action.payload;
+            state.type = 'LLM'; 
         }
-        
-
     },
 });
 
-export const { selectGenreOrCategory, searchMovie, selectGenre } = genreOrCategory.actions;
+export const { selectGenreOrCategory, searchMovie, selectGenre, searchMovieLLM } = genreOrCategory.actions;
 
 export default genreOrCategory.reducer;

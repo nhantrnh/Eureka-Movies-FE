@@ -5,11 +5,11 @@ import { Movie as MovieIcon, Theaters, Language, PlusOne, Favorite, FavoriteBord
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axios';
-import { Loader, NotFound } from './../index.js'
+import { Loader, NotFound, MovieList } from './../index.js'
 import moviePoster from './../../assests/movie-poster.png'
 import genreIcons from './../../assests/genres/index.js'
 import { selectGenreOrCategory } from '../../features/currentGenreOrCategory.js';
-import { useFetchFavoriteList, useFetchWatchList } from '../../api/userAPI.js';
+import { useFetchFavoriteList, useFetchWatchList, useFetchMovieRecommendations } from '../../api/userAPI.js';
 import { isRejected } from '@reduxjs/toolkit';
 
 export default function MovieInformation() {
@@ -22,7 +22,7 @@ export default function MovieInformation() {
     const [isMovieFavorited, setIsMovieFavorited] = useState(false);
     const [isMovieWatchlisted, setIsMovieWatchlisted] = useState(false);
     const { tmdbId } = useParams();
-
+    let rcm = '';
     const { favoriteMovies, isFetching1, error1, addToFavorites, removeFromFavorites } = useFetchFavoriteList(); // Sử dụng custom hook
     const { watchList, isFetching2, error3, addToWatches, removeFromWatches } = useFetchWatchList(); // Sử dụng custom hook
     const [data, setData] = useState(null);
@@ -73,6 +73,12 @@ export default function MovieInformation() {
         fetchData();
     }, [tmdbId]);
 
+    const displayText = data?.overview 
+    ? data.overview.substring(0, 3000) 
+    : data?.title;
+
+    const { recommendations, isFetching4, error4 } = useFetchMovieRecommendations(displayText); // Sử dụng custom hook
+    console.log(recommendations);
     function formatDate(inputDate) {
         const months = [
             "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -351,11 +357,11 @@ export default function MovieInformation() {
             </Grid>
 
 
-            {/* Recommended Movies */}
-            {/* {recommendations?.total_results > 0 ? <Box marginTop='5rem' width='100%'>
+           
+             {recommendations?.length > 0 ? <Box marginTop='5rem' width='100%'>
                 <Typography variant='h3' gutterBottom align='center'>You might also like</Typography>
                 <MovieList movies={recommendations} numberOfMovies={12} />
-            </Box> : null} */}
+            </Box> : null}
 
 
             {/* Modal Movie */}

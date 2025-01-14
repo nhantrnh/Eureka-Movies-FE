@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import useStyles from './RatingList.js';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography, Link } from '@mui/material';
 import { Loader } from '../index.js';
 import { Helmet } from 'react-helmet';
 import { useFetchWatchList } from '../../api/userAPI.js';
-import { useNavigate, Link } from 'react-router-dom';
 import { Pagination } from '../index.js'
 
 export default function RatingList() {
     const classes = useStyles();
-    const navigate = useNavigate();
 
     // State for page numbers
-    const [watchlistPage, setWatchlistPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1); // Keep track of total pages for pagination
     const [page, setPage] = useState(1);
 
-    const { watchList, isFetching3, error3, addToWatches, removeFromWatches } = useFetchWatchList(); // Pass page as parameter
+    const { watchList, isFetching3, error3 } = useFetchWatchList(); // Pass page as parameter
 
     useEffect(() => {
         // Check if the data has total pages, update totalPages
@@ -24,11 +21,6 @@ export default function RatingList() {
             setTotalPages(watchList.totalPages);
         }
     }, [watchList]); // Whenever the watchlist data updates, update the total pages
-
-    function logout() {
-        localStorage.clear();
-        window.location.href = '/';
-    }
 
     if (isFetching3) {
         return <Loader size="8rem" />;

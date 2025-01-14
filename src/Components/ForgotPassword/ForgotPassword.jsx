@@ -29,6 +29,10 @@ const ForgotPassword = () => {
   return (
     <>
       <h1>Forgot Password</h1>
+      <div style={{ marginBottom: 20, fontSize: "16px", color: "#555" }}>
+        <p>Please enter your Gmail address below. A password reset link will be sent to your email.</p>
+        <p>If you don't receive the email, please check your spam folder.</p>
+      </div>
       <Form
         onFinish={handleForgotPassword}
         disabled={loading}
@@ -47,7 +51,14 @@ const ForgotPassword = () => {
         <Form.Item
           label="Email"
           name="email"
-          rules={[{ required: true, type: "email", message: "Invalid email" }]}
+          rules={[
+            { required: true, message: "Please enter your email" },
+            { type: "email", message: "Invalid email format" },
+            {
+              pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
+              message: "Please enter a valid Gmail address",
+            },
+          ]}
         >
           <Input />
         </Form.Item>

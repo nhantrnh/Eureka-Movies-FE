@@ -10,6 +10,64 @@ export const fetchMovieData = async (tmdbId) => {
   }
 };
 
+export const useFetchMovieRecommendations = (des) => {
+  const [recommendations, setRecommendations] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    setIsFetching(true);
+    try {
+      const response = await axiosInstance.get(`/Recommendation/LLMSearch?Collection=movies&Query=${des}&Amount=12&Threshold=0.25`);
+      if (response.data) {
+        setRecommendations(response.data.data);
+      } else {
+        console.error('No data returned from API.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [des]);
+
+  return { recommendations, isFetching, error };
+}
+
+export const useFetchUserHistory = (des) => {
+  const [history, setHistory] = useState(null);
+  const [isFetching2, setIsFetching] = useState(false);
+  const [error2, setError] = useState(null);
+
+  const fetchData = async () => {
+    setIsFetching(true);
+    try {
+      const response = await axiosInstance.get(`/Recommendation/LLMSearch?Collection=movies&Query=${des}&Amount=30&Threshold=0.25`);
+      if (response.data) {
+        setHistory(response.data.data);
+      } else {
+        console.error('No data returned from API.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  return { history, isFetching2, error2 };
+}
+
 export const useFetchWatchList = () => {
   const [watchList, setWatchList] = useState(null);
   const [isFetching3, setIsFetching] = useState(false);

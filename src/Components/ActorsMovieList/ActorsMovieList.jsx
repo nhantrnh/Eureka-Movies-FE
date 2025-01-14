@@ -3,7 +3,7 @@ import useStyles from './ActorsMovieList.style.js';
 import { Box, Button, Typography } from '@mui/material';
 import { Loader } from './../index.js';
 import { Helmet } from 'react-helmet';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Pagination } from './../index.js';
 import moviePoster from './../../assests/movie-poster.png'
 import axiosInstance from '../../utils/axios';
@@ -12,7 +12,6 @@ export default function ActorsMovieList() {
     const classes = useStyles();
     const { tmdbId } = useParams();
     // State for page numbers
-    const [dataPage, setdataPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1); // Keep track of total pages for pagination
     const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState(null);
@@ -65,11 +64,6 @@ export default function ActorsMovieList() {
             </Helmet>
 
             <Box>
-                <Box display="flex" justifyContent="space-between">
-                    <Typography variant="h4" gutterBottom>
-                        My Favorite Movies
-                    </Typography>
-                </Box>
 
                 {!data?.length ? (
                     <Typography variant="h5">
@@ -80,7 +74,7 @@ export default function ActorsMovieList() {
                         {/* Favorite Movies */}
                         {data?.length ? (
                             <Box>
-                                <Typography variant="h5">Favorite Movies</Typography>
+                                <Typography variant="h5">Actors List</Typography>
                                 <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gap={2} >
                                     {data.map((actor) => (
                                         <Box key={actor.tmdbId} display="flex" flexDirection="column" alignItems="center">

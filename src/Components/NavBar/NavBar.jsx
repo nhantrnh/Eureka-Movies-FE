@@ -1,10 +1,11 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import useStyles from './NavBar.style.js';
-import { AppBar, IconButton, Toolbar, useMediaQuery, Drawer, Button, Avatar, Select, MenuItem } from '@mui/material';
-import { Brightness7, Brightness4, AccountCircle, Menu, AccountCircleOutlined } from '@mui/icons-material';
+import { AppBar, IconButton, Toolbar, useMediaQuery, Drawer, Button, Select, MenuItem } from '@mui/material';
+import { Brightness7, Brightness4, AccountCircle, Menu, AccountCircleOutlined, Search as SearchIcon } from '@mui/icons-material';
+import Switch from '@mui/material/Switch';
 import { useTheme } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Sidebar } from './../index.js';
+import { Search, Sidebar, AdvancedSearch } from './../index.js'; // Assume you have a second search component, e.g., AdvancedSearch
 import { useDispatch } from 'react-redux';
 import { selectGenre } from '../../features/currentGenreOrCategory.js';
 import { useAuthStore } from "../../hooks/useAuthStore";
@@ -12,7 +13,8 @@ import { ColorModeContext } from './../../utils/ToggoleColorMode';
 
 export default function NavBar() {
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [category, setCategory] = useState('animation'); // Add category state
+    const [category, setCategory] = useState('animation'); 
+    const [isAdvancedSearch, setIsAdvancedSearch] = useState(false); // State for search mode
     const classes = useStyles();
     const isMobile = useMediaQuery('(max-width: 600px)');
     const theme = useTheme();
@@ -48,10 +50,14 @@ export default function NavBar() {
     const logout = useAuthStore((state) => state.logout); 
 
     const handleLogout = () => {
-      logout(); 
-      navigate('/');
+        logout(); 
+        navigate('/');
     };
-  
+
+    const toggleSearchMode = () => {
+        setIsAdvancedSearch(!isAdvancedSearch); // Toggle search mode
+    };
+
     return (
         <>
             <AppBar position='fixed'>
@@ -71,7 +77,17 @@ export default function NavBar() {
                         {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
                     </IconButton>
 
-                    {!isMobile && <Search />}
+                    {!isMobile && (
+                        <>
+                            {isAdvancedSearch ? <AdvancedSearch /> : <Search />} {/* Conditional Rendering */}
+                            <Switch
+                                checked={isAdvancedSearch}
+                                onChange={toggleSearchMode}
+                                color="default"
+                                inputProps={{ 'aria-label': 'toggle search mode' }}
+                            />
+                        </>
+                    )}
                    
                     <Select
                         value={category}
@@ -85,33 +101,40 @@ export default function NavBar() {
                     </Select>
                     <div>
                     {!accessToken ? 
-  <>
-  <Button color='inherit' onClick={handleGoToAdminPage}>
-      Login &nbsp; <AccountCircle />
-  </Button>
-  <Button color='inherit' onClick={handleRegister}>
-      Sign Up &nbsp; <AccountCircleOutlined />
-  </Button>
-</>
-                     : (
                         <>
-                        <Select
-                            value="profile" // Set the select to show the profile options
-                            onChange={handleLogout} // You can modify this to handle your logout if needed
-                            sx={{ color: 'white', ml: 2 }}
-                        >
-                            <MenuItem value="profile" component={Link} to={`/profile`}>
-                                User Profile
-                            </MenuItem>
-                            <MenuItem onClick={handleLogout}>
-                                Logout
-                            </MenuItem>
-                        </Select>
-                    </>
-                    )}
-                </div>
+                            <Button color='inherit' onClick={handleGoToAdminPage}>
+                                Login &nbsp; <AccountCircle />
+                            </Button>
+                            <Button color='inherit' onClick={handleRegister}>
+                                Sign Up &nbsp; <AccountCircleOutlined />
+                            </Button>
+                        </>
+                        : (
+                            <>
+                                <Select
+                                    value="profile"
+                                    onChange={handleLogout}
+                                    sx={{ color: 'white', ml: 2 }}
+                                >
+                                    <MenuItem value="profile" component={Link} to={`/profile`}>
+                                        User Profile
+                                    </MenuItem>
+                                    <MenuItem onClick={handleLogout}>
+                                        Logout
+                                    </MenuItem>
+                                </Select>
+                            </>
+                        )}
+                    </div>
                     
-                    {isMobile && <Search />}
+                    {isMobile && (
+                        <>
+                            {isAdvancedSearch ? <AdvancedSearch /> : <Search />} {/* Conditional Rendering */}
+                            <IconButton onClick={toggleSearchMode} color='inherit'>
+                                <SearchIcon />
+                            </IconButton>
+                        </>
+                    )}
                 </Toolbar>
             </AppBar>
 

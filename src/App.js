@@ -1,7 +1,7 @@
 import './App.css';
 import { CssBaseline } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
-import { Movies, MovieInformation, Actors, Profile, NavBar, NotFound, RatingList, Login, ActorsMovieList, WatchingList, FavoriteList, Register, ResetPassword, ActorsList, ConfirmEmail, ForgotPassword, RenewPassword, PublicRoute, PrivateRoute } from './Components/index.js';
+import { Movies, MovieInformation, Actors, Profile, NavBar, NotFound, UserHistory, RatingList, Login, ActorsMovieList, WatchingList, FavoriteList, Register, ResetPassword, ActorsList, ConfirmEmail, ForgotPassword, RenewPassword, PublicRoute, PrivateRoute } from './Components/index.js';
 import useStyles from './App.styles.js';
 import { Helmet } from 'react-helmet';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -38,6 +38,7 @@ function App() {
               <Route path='/profile/favorite' element={<PrivateRoute><FavoriteList /></PrivateRoute>} />
               <Route path='/profile/ratings' element={<PrivateRoute><RatingList /></PrivateRoute>} />
               <Route path="/movie/:tmdbId/casts" element={<PrivateRoute><ActorsMovieList /></PrivateRoute>} />
+              <Route path="profile/recommendations" element={<PrivateRoute><UserHistory /></PrivateRoute>} />
             </Routes>
           </GoogleOAuthProvider>
         </main>
